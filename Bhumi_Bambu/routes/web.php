@@ -6,11 +6,14 @@ use App\Http\Controllers\LandingPageController;
 
 // Route::get('/', [LandingPageController::class, 'index']);
 
+use App\Http\Controllers\LoginController;
+
+Route::get('/', [LandingPageController::class, 'index']);
+Route::get('/login', [LoginController::class, 'login'])->name('login');
 
 // Route::get('/', function () {
 //     return view('welcome');
 // });
-
 /*
 | Public
 */
@@ -55,3 +58,4 @@ Route::middleware(['auth'])->group(function () {
 */
 
 Route::post('/apply-promo', [PemesananController::class, 'applyPromo'])->name('apply.promo');
+
