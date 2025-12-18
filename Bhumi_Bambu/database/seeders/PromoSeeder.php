@@ -14,20 +14,29 @@ class PromoSeeder extends Seeder
     {
         \App\Models\Promo::create([
             'id_admin' => 1,
-            'nama_promo' => 'BhumiBhumi',
-            'deskripsi' => 'Diskon 10% untuk semua paket layanan Bhumi Bambu.',
-            'tanggal_mulai' => '2024-07-01',
-            'tanggal_selesai' => '2024-07-31',
+            'nama_promo' => 'BAMBUSTART',
+            'deskripsi' => 'Diskon Khusus Pengguna Baru! Hemat Hingga 20%!',
+            'tanggal_mulai' => '2025-12-01',
+            'tanggal_selesai' => '2026-12-01',
             'diskon' => 10,
         ]);
 
         \App\Models\Promo::create([
             'id_admin' => 2,
-            'nama_promo' => 'BambuFest',
-            'deskripsi' => 'Diskon 15% untuk pemesanan paket layanan selama festival BambuFest.',
-            'tanggal_mulai' => '2024-08-10',
-            'tanggal_selesai' => '2024-08-20',
+            'nama_promo' => 'BAMBUSHOCK',
+            'deskripsi' => 'Flash Sale! Harga Spesial Untuk Libur NATARU',
+            'tanggal_mulai' => '2025-12-24',
+            'tanggal_selesai' => '2026-01-01',
             'diskon' => 15,
+        ]);
+
+        \App\Models\Promo::create([
+            'id_admin' => 3,
+            'nama_promo' => 'BAMBUFEST',
+            'deskripsi' => 'Promo Akhir Tahun.',
+            'tanggal_mulai' => '2025-12-30',
+            'tanggal_selesai' => '2025-12-31',
+            'diskon' => 20,
         ]);
     }
 }
