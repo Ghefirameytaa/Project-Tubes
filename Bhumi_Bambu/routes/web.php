@@ -1,18 +1,26 @@
 <?php
 
 use App\Http\Controllers\LandingPageController;
-use App\Models\Pembayaran;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PembayaranController;
+
+
 // use App\Http\Controllers\PromoController;
 
 
 
 // Route::get('/', [LandingPageController::class, 'index']);
 
-use App\Http\Controllers\LoginController;
 
 Route::get('/', [LandingPageController::class, 'index']);
 Route::get('/login', [LoginController::class, 'login'])->name('login');
 
+Route::get('/pembayaran', [PembayaranController::class, 'index']);
+Route::get('/pembayaran/create', [PembayaranController::class, 'create']);
+Route::post('/pembayaran', [PembayaranController::class, 'store']);
+Route::get('/pembayaran/{id}/edit', [PembayaranController::class, 'edit']);
+Route::put('/pembayaran/{id}', [PembayaranController::class, 'update']);
+Route::delete('/pembayaran/{id}', [PembayaranController::class, 'destroy']);
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -25,9 +33,9 @@ Route::get('/login', [LoginController::class, 'login'])->name('login');
 | Public
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('', function () {
+//     return view('welcome');
+// });
 
 
 /*
@@ -61,4 +69,5 @@ Route::middleware(['auth'])->group(function () {
 */
 
 Route::post('/apply-promo', [PemesananController::class, 'applyPromo'])->name('apply.promo');
+
 

@@ -2,24 +2,22 @@
 
 namespace App\Models;
 
-use App\Models\Pemesanan;
-use Illuminate\Databae\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Pembayaran extends Model
 {
     protected $table = 'pembayaran';
 
     protected $fillable = [
-        'id_pemesanan',
+        'pemesanan_id',
         'metode_pembayaran',
-        'jumlah_pembayaran',
-        'tanggal_pembayaran',
-        'status_pembayaran',
+        'jumlah_bayar',
+        'tanggal_bayar',
+        'status'
     ];
-
-    public function pemesanan()
+    public function pemesanan(): BelongsTo
     {
-        return $this->belongsTo(Pemesanan::class, 'id_pemesanan');
+        return $this->belongsTo(Pemesanan::class, 'pemesanan_id');
     }
 }
