@@ -3,14 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Detail Pembayaran</title>
-
-
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-</a>
 
     <style>
         * {
@@ -39,6 +33,7 @@
             font-weight: 600;
             font-size: 18px;
             margin-bottom: 30px;
+            color: #2f6f3e;
         }
 
         .menu a {
@@ -160,13 +155,71 @@
             font-weight: 600;
         }
 
+        /* ================= ALERT ================= */
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ================= FILTERS ================= */
+        .filters {
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
         .btn-add {
             background: #4f7f5f;
             color: #fff;
-            padding: 8px 18px;
-            border-radius: 20px;
+            padding: 10px 20px;
+            border-radius: 8px;
             font-size: 14px;
             text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-add:hover {
+            background: #3d6348;
         }
 
         /* ================= TABLE ================= */
@@ -196,6 +249,10 @@
             border-bottom: 1px solid #eee;
         }
 
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
         /* ================= STATUS ================= */
         .status {
             padding: 6px 14px;
@@ -219,18 +276,54 @@
         }
 
         /* ================= ACTION ================= */
-        .action i {
+        .action {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-detail {
+            color: #2563eb;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            border: 1px solid #2563eb;
+        }
+
+        .btn-detail:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-edit {
+            color: #f4b400;
             cursor: pointer;
-            margin-right: 12px;
             font-size: 15px;
         }
 
-        .edit {
-            color: #f4b400;
+        .btn-delete {
+            color: #ff5c5c;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
         }
 
-        .delete {
-            color: #ff5c5c;
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -243,7 +336,7 @@
     <div class="menu">
         <a href="#"><i class="fa-solid fa-house"></i> Dashboard</a>
         <a href="#"><i class="fa-solid fa-list"></i> List Pesanan</a>
-        <a href="#" class="active"><i class="fa-solid fa-wallet"></i> Pembayaran</a>
+        <a href="/pembayaran" class="active"><i class="fa-solid fa-wallet"></i> Pembayaran</a>
         <a href="#"><i class="fa-solid fa-box"></i> Paket</a>
         <a href="#"><i class="fa-solid fa-tag"></i> Promo</a>
         <a href="#"><i class="fa-solid fa-gear"></i> Peraturan</a>
@@ -258,7 +351,9 @@
     <div class="topbar">
         <div class="search-box">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Cari">
+            <form action="/pembayaran" method="GET" style="width: 100%;">
+                <input type="text" name="search" placeholder="Cari pembayaran..." value="{{ request('search') }}">
+            </form>
         </div>
 
         <div class="topbar-right">
@@ -267,8 +362,8 @@
             <div class="profile">
                 <img src="https://i.pravatar.cc/40" alt="Admin">
                 <div class="profile-text">
-                    <div class="name">Ghefira Meyta</div>
-                    <div class="role">Admin</div>
+                    <div class="name">Admin</div>
+                    <div class="role">Administrator</div>
                 </div>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
@@ -280,60 +375,116 @@
 
         <div class="content-header">
             <h2>Detail Pembayaran</h2>
-            <a href="#" class="btn-add">+ Tambah</a>
+            <a href="/pembayaran/create" class="btn-add">
+                <i class="fa-solid fa-plus"></i> Tambah Pembayaran
+            </a>
+        </div>
+
+        {{-- Alert Success --}}
+        @if(session('success'))
+            <div class="alert alert-success">
+                <i class="fa-solid fa-circle-check"></i>
+                {{ session('success') }}
+            </div>
+        @endif
+
+        {{-- Alert Error --}}
+        @if(session('error'))
+            <div class="alert alert-error">
+                <i class="fa-solid fa-exclamation-triangle"></i>
+                {{ session('error') }}
+            </div>
+        @endif
+
+        {{-- Filters --}}
+        <div class="filters">
+            <form action="/pembayaran" method="GET" style="display: flex; gap: 15px; align-items: center; width: 100%;">
+                <select name="status" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Status</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Verifikasi</option>
+                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Berhasil</option>
+                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Dibatalkan</option>
+                </select>
+                
+                @if(request('status') || request('search'))
+                    <a href="/pembayaran" style="color: #666; text-decoration: none; font-size: 13px;">
+                        <i class="fa-solid fa-rotate-right"></i> Reset Filter
+                    </a>
+                @endif
+            </form>
         </div>
 
         <div class="card">
             <table>
                 <thead>
                     <tr>
-                        <th>Nama Paket</th>
-                        <th>Nama Pelanggan</th>
-                        <th>Tanggal Acara</th>
-                        <th>Total Harga</th>
+                        <th>ID</th>
+                        <th>ID Pemesanan</th>
+                        <th>Nama Pengirim</th>
+                        <th>Bank</th>
+                        <th>Tanggal Bayar</th>
+                        <th>Jumlah</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Paket Bambu Area</td>
-                        <td>Farah Rizki</td>
-                        <td>Bambu Area</td>
-                        <td>Rp300.000</td>
-                        <td><span class="status success">Berhasil</span></td>
-                        <td class="action">
-                            <i class="fa-solid fa-pen edit"></i>
-                            <i class="fa-solid fa-trash delete"></i>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Paket Bhumi Area</td>
-                        <td>Abimanyu</td>
-                        <td>Bhumi Area</td>
-                        <td>Rp400.000</td>
-                        <td><span class="status pending">Menunggu</span></td>
-                        <td class="action">
-                            <i class="fa-solid fa-pen edit"></i>
-                            <i class="fa-solid fa-trash delete"></i>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Paket Edukasi</td>
-                        <td>Jaehyun Jung</td>
-                        <td>Outdoor</td>
-                        <td>Rp500.000</td>
-                        <td><span class="status cancel">Dibatalkan</span></td>
-                        <td class="action">
-                            <i class="fa-solid fa-pen edit"></i>
-                            <i class="fa-solid fa-trash delete"></i>
-                        </td>
-                    </tr>
+                    @forelse($pembayaran as $item)
+                        <tr>
+                            <td><strong>#{{ $item->id }}</strong></td>
+                            <td>{{ $item->id_pemesanan }}</td>
+                            <td>{{ $item->nama_pengirim ?? '-' }}</td>
+                            <td>{{ $item->nama_bank ?? $item->metode_pembayaran }}</td>
+                            <td>{{ $item->tanggal_pembayaran->format('d/m/Y') }}</td>
+                            <td><strong style="color: #17b890;">Rp {{ number_format($item->jumlah_bayar, 0, ',', '.') }}</strong></td>
+                            <td>
+                                <span class="status {{ $item->getStatusBadgeClass() }}">
+                                    {{ $item->getStatusLabel() }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action">
+                                    <a href="/pembayaran/{{ $item->id }}" class="btn-detail" title="Lihat Detail">
+                                        <i class="fa-solid fa-eye"></i> Detail
+                                    </a>
+                                    <a href="/pembayaran/{{ $item->id }}/edit" title="Edit">
+                                        <i class="fa-solid fa-pen btn-edit"></i>
+                                    </a>
+                                    <form action="/pembayaran/{{ $item->id }}" method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus pembayaran ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-delete" title="Hapus">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-inbox"></i>
+                                    <p><strong>Belum Ada Data Pembayaran</strong></p>
+                                    <p style="font-size: 14px; color: #666;">Klik tombol "Tambah Pembayaran" untuk menambahkan data baru</p>
+                                    <a href="/pembayaran/create" class="btn-add" style="margin-top: 10px;">
+                                        <i class="fa-solid fa-plus"></i> Tambah Pembayaran Pertama
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+
+        {{-- Info total data --}}
+        @if($pembayaran->count() > 0)
+            <p style="margin-top: 15px; color: #666; font-size: 14px;">
+                <i class="fa-solid fa-info-circle"></i> 
+                Total: <strong>{{ $pembayaran->count() }}</strong> pembayaran
+            </p>
+        @endif
 
     </div>
 </div>

@@ -13,11 +13,12 @@ use App\Http\Controllers\PembayaranController;
 
 
 Route::get('/', [LandingPageController::class, 'index']);
-Route::get('/login', [LoginController::class, 'login'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 
 Route::get('/pembayaran', [PembayaranController::class, 'index']);
 Route::get('/pembayaran/create', [PembayaranController::class, 'create']);
 Route::post('/pembayaran', [PembayaranController::class, 'store']);
+Route::get('/pembayaran/show', [PembayaranController::class, 'show']); 
 Route::get('/pembayaran/{id}/edit', [PembayaranController::class, 'edit']);
 Route::put('/pembayaran/{id}', [PembayaranController::class, 'update']);
 Route::delete('/pembayaran/{id}', [PembayaranController::class, 'destroy']);

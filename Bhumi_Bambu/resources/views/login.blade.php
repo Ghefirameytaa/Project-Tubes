@@ -281,6 +281,7 @@
             </div>
 
             <form action="{{ route('login.submit') }}" method="POST">
+                @csrf
                 <div class="form-group">
                     <label for="email">Email<span>*</span></label>
                     <input 
