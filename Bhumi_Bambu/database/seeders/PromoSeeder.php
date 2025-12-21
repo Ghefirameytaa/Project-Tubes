@@ -15,7 +15,7 @@ class PromoSeeder extends Seeder
         \App\Models\Promo::create([
             'id_admin' => 1,
             'nama_promo' => 'BAMBUSTART',
-            'deskripsi' => 'Diskon Khusus Pengguna Baru! Hemat Hingga 20%!',
+            'deskripsi' => 'Diskon Khusus Pengguna Baru! Hemat Hingga 10%!',
             'tanggal_mulai' => '2025-12-01',
             'tanggal_selesai' => '2026-12-01',
             'diskon' => 10,

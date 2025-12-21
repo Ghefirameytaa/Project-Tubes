@@ -1,77 +1,50 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Dashboard;
-use Illuminate\Http\Request;
-use Carbon\Carbon;
+use App\Models\Acara;
+use App\Models\Pemesanan;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $tanggal = $request->get('tanggal', Carbon::today()->format('Y-m-d'));
+        // Tanggal dari query string, default hari ini
+        $tanggal = request()->get('tanggal', date('Y-m-d'));
 
-        $acaraBerlangsung = Acara::where('status', 'berlangsung')
-            ->whereDate('tanggal_acara', $tanggal)
-            ->count();
-        
-        $menungguKonfirmasi = Acara::where('status', 'menunggu')
-            ->whereDate('tanggal_acara', $tanggal)
-            ->count();
+        // Statistik kartu
+        $acaraBerlangsung = Acara::where('status', 'berlangsung')->count();
+        $acaraSelesai = Acara::where('status', 'selesai')->count();
+        $menungguKonfirmasi = Pemesanan::where('status_pemesanan', 'menunggu')->count();
 
-        $acaraSelesai = Acara::where('status', 'berhasil')
-            ->whereDate('tanggal_acara', $tanggal)
-            ->count();
+        // Venue terpakai default 0
+        $venueTerpakai = 0;
 
-        $venueTerpakai = Acara::where('status', '!=', 'dibatalkan')
-            ->whereDate('tanggal_acara', $tanggal)
-            ->distinct('venue_id')
-            ->count('venue_id');
-
-        // Detail pelanggan untuk tanggal yang dipilih
-        $detailPelanggan = Acara::with(['paket', 'venue', 'pelanggan'])
-            ->whereDate('tanggal_acara', $tanggal)
-            ->orderBy('waktu_mulai', 'asc')
+        // Detail pelanggan
+        $detailPelanggan = Pemesanan::with(['paket', 'pelanggan'])
+            ->whereDate('tanggal_pemesanan', $tanggal)
             ->get()
-            ->map(function($acara) {
+            ->map(function ($item) {
                 return [
-                    'nama_paket' => $acara->paket->nama ?? '-',
-                    'nama_pelanggan' => $acara->pelanggan->nama ?? '-',
-                    'tanggal_acara' => Carbon::parse($acara->tanggal_acara)->format('d F Y'),
-                    'waktu_mulai' => Carbon::parse($acara->waktu_mulai)->format('H.i') . ' WIB',
-                    'total_harga' => 'Rp' . number_format($acara->total_harga, 0, ',', '.'),
-                    'venue' => $acara->venue->nama ?? '-',
-                    'status' => $acara->status,
-                    'status_label' => $this->getStatusLabel($acara->status),
-                    'status_color' => $this->getStatusColor($acara->status)
+                    'nama_paket' => $item->paket->nama ?? '-',
+                    'nama_pelanggan' => $item->pelanggan->nama_pelanggan ?? '-',
+                    'tanggal_acara' => $item->tanggal_acara,
+                    'waktu_mulai' => $item->waktu_mulai ?? '-',
+                    'total_harga' => $item->total_harga ?? '-',
+                    'venue' => $item->venue ?? '-',
+                    'status' => $item->status,
+                    'status_label' => ucfirst($item->status),
                 ];
             });
-    }
 
-    private function getStatusLabel($status)
-    {
-        $labels = [
-            'berhasil' => 'Berhasil',
-            'menunggu' => 'Menunggu',
-            'dibatalkan' => 'Dibatalkan',
-            'berlangsung' => 'Berlangsung'
-        ];
-        
-        return $labels[$status] ?? $status;
-    }
-    
-    private function getStatusColor($status)
-    {
-        $colors = [
-            'berhasil' => 'success',
-            'menunggu' => 'warning',
-            'dibatalkan' => 'danger',
-            'berlangsung' => 'primary'
-        ];
-        
-        return $colors[$status] ?? 'secondary';
+        return view('dashboard', compact(
+            'acaraBerlangsung',
+            'acaraSelesai',
+            'menungguKonfirmasi',
+            'venueTerpakai',
+            'detailPelanggan',
+            'tanggal'
+        ));
     }
 }
-
