@@ -5,15 +5,12 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PembayaranController;
 
 
-// use App\Http\Controllers\PromoController;
-
-
-// Route::get('/', [LandingPageController::class, 'index']);
-
 
 Route::get('/', [LandingPageController::class, 'index']);
-Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
-R
+Route::get('/login', [LoginController::class, 'login'])->name('login.submit');
+Route::post('/login', [LoginController::class, 'authenticate'])->name('login.authenticate');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
 
 Route::get('/pembayaran', [PembayaranController::class, 'index']);
 Route::get('/pembayaran/create', [PembayaranController::class, 'create']);
