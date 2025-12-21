@@ -4,12 +4,6 @@
 <div class="container">
     <h2>Detail Promo</h2>
 
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <a href="{{ route('promo.create') }}" class="btn btn-primary mb-3">
         + Tambah Promo
     </a>
@@ -64,4 +58,23 @@
         </tbody>
     </table>
 </div>
+
+{{-- MODAL SUCCESS EDIT --}}
+@if(session('success'))
+<div class="promo-modal-overlay" id="promoModal">
+    <div class="promo-modal">
+        <div class="check-icon">✔</div>
+        <h4>Edit promo berhasil</h4>
+        <p>{{ session('success') }}</p>
+        <button onclick="closePromoModal()">OK</button>
+    </div>
+</div>
+@endif
+
+{{-- JAVASCRIPT --}}
+<script>
+function closePromoModal() {
+    document.getElementById('promoModal').style.display = 'none';
+}
+</script>
 @endsection
