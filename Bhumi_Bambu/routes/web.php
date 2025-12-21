@@ -5,14 +5,11 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PembayaranController;
-<<<<<<< HEAD
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
-=======
 use App\Http\Controllers\PromoController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\AuthController;
+// use App\Http\Controllers\DashboardController;
+// use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
->>>>>>> 59c6640e23d68cdd21ed2ba75c256de1aba0fe83
 
 Route::middleware(['web'])->group(function () {
     Route::get('/login', [LoginController::class, 'login'])->name('login');
@@ -31,7 +28,6 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [LandingPageController::class, 'index']);
 
-<<<<<<< HEAD
 Route::get('/login', [LoginController::class, 'login'])->name('login'); // tampilkan form login
 Route::post('/login', [AuthController::class, 'login'])->name('login.authenticate'); // proses login
 
@@ -52,7 +48,6 @@ Route::get('/login', function () {
 })->name('login');
 
 Route::post('/login', [LoginController::class, 'login'])->name('login');
->>>>>>> 59c6640e23d68cdd21ed2ba75c256de1aba0fe83
 
 
 
