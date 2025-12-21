@@ -28,8 +28,4 @@ class CreatePembayaran extends Migration
     {
         Schema::dropIfExists('pembayaran');
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> cfc6bfdebe574f9e5a956f52d534cd4cfdd58134
