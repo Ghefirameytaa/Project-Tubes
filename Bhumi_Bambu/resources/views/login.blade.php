@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bhumi Bambu Baturraden - Login</title>
     <style>
-        * {
+        {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -281,6 +281,7 @@
             </div>
 
             <form action="{{ route('login') }}" method="POST">
+                @csrf
                 <div class="form-group">
                     <label for="email">Email<span>*</span></label>
                     <input 
