@@ -16,13 +16,31 @@ Route::get('/login', function () {
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 
 
+
+// READ - List semua pembayaran (dengan filter & search)
 Route::get('/pembayaran', [PembayaranController::class, 'index']);
+
+// CREATE - Form tambah pembayaran baru
 Route::get('/pembayaran/create', [PembayaranController::class, 'create']);
+
+// CREATE - Simpan data pembayaran baru
 Route::post('/pembayaran', [PembayaranController::class, 'store']);
-Route::get('/pembayaran/show', [PembayaranController::class, 'show']); 
+return redirect('/pembayaran')->with('success', 'Pembayaran berhasil ditambahkan');
+
+// READ - Detail pembayaran tertentu
+Route::get('/pembayaran/{id}', [PembayaranController::class, 'show']);
+
+// UPDATE - Form edit pembayaran
 Route::get('/pembayaran/{id}/edit', [PembayaranController::class, 'edit']);
+
+// UPDATE - Simpan perubahan pembayaran
 Route::put('/pembayaran/{id}', [PembayaranController::class, 'update']);
+
+// DELETE - Hapus pembayaran
 Route::delete('/pembayaran/{id}', [PembayaranController::class, 'destroy']);
+
+// BONUS - Verifikasi pembayaran (Approve/Reject)
+Route::post('/pembayaran/{id}/verify', [PembayaranController::class, 'verify']);
 
 // Route::get('/', function () {
 //     return view('welcome');
