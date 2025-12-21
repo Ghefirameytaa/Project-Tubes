@@ -41,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
 });
 // Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'admin'])->name('admin.dashboard');
 
-=======
+
 Route::get('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::get('/login', function () {
     return view('login');   
