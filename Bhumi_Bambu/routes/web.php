@@ -3,9 +3,6 @@
 use App\Http\Controllers\LandingPageController;
 // use App\Http\Controllers\PromoController;
 
-
-// Route::get('/', [LandingPageController::class, 'index']);
-
 use App\Http\Controllers\LoginController;
 
 Route::get('/', [LandingPageController::class, 'index']);
@@ -23,7 +20,7 @@ Route::get('/login', [LoginController::class, 'login'])->name('login');
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('landingpage.index');
 });
 
 

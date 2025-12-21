@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #0066B3 0%, #003D7A 100%);
+            background: linear-gradient(135deg, #ffffffff 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -45,7 +45,7 @@
         }
 
         .header-section {
-            background: linear-gradient(135deg, #0066B3 0%, #003D7A 100%);
+            background: linear-gradient(135deg, #2C5F2D 100%);
             padding: 10px 20px;
             text-align: center;
             position: relative;
@@ -220,7 +220,7 @@
         }
 
         .forgot-password {
-            color: #0066B3;
+            color: #FE6766;
             text-decoration: none;
             font-weight: 500;
             font-size: 12px;
@@ -233,7 +233,7 @@
         .login-button {
             width: 100%;
             padding: 14px;
-            background: #E31E24;
+            background: #1d6436ff;
             color: white;
             border: none;
             border-radius: 8px;
@@ -241,13 +241,13 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 14px rgba(227, 30, 36, 0.3);
+            box-shadow: 0 4px 14px rgba(67, 153, 116, 0.3);
         }
 
         .login-button:hover {
-            background: #FF4444;
+            background: #248847ff;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(227, 30, 36, 0.4);
+            box-shadow: 0 6px 20px rgba(68, 153, 116, 0.3);
         }
 
         .login-button:active {
@@ -280,14 +280,14 @@
                 <h2>Selamat Datang Kembali!</h2>
             </div>
 
-            <form action="{{ route('login.submit') }}" method="POST">
+            <form action="{{ route('login') }}" method="POST">
                 <div class="form-group">
                     <label for="email">Email<span>*</span></label>
                     <input 
                         type="email" 
                         id="email" 
                         name="email" 
-                        placeholder="Admin@cherrypetclinic.com" 
+                        placeholder="Admin@bhumibambu.com" 
                         required
                     >
                 </div>
@@ -304,8 +304,8 @@
                         >
                         <span class="toggle-password" onclick="togglePassword()">
                             <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </span>
                     </div>
@@ -319,7 +319,7 @@
                     <a href="#" class="forgot-password">Lupa Kata Sandi?</a>
                 </div>
 
-                <button type="submit" class="login-button">Masuk ke Dashboard</button>
+                <button type="submit" class="login-button">Masuk</button>
             </form>
         </div>
     </div>
