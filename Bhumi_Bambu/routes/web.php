@@ -13,7 +13,7 @@ use App\Http\Controllers\PembayaranController;
 
 
 Route::get('/', [LandingPageController::class, 'index']);
-Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
+Route::get('/login', [LoginController::class, 'login'])->name('login.submit');
 
 Route::get('/pembayaran', [PembayaranController::class, 'index']);
 Route::get('/pembayaran/create', [PembayaranController::class, 'create']);
