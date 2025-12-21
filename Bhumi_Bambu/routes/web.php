@@ -8,7 +8,6 @@ use App\Http\Controllers\PembayaranController;
 // use App\Http\Controllers\PromoController;
 
 
-
 // Route::get('/', [LandingPageController::class, 'index']);
 
 
@@ -34,10 +33,12 @@ Route::delete('/pembayaran/{id}', [PembayaranController::class, 'destroy']);
 | Public
 */
 
+Route::get('/', function () {
+    return view('landingpage.index');
+});
 // Route::get('', function () {
 //     return view('welcome');
 // });
-
 
 /*
 / Admin Promo CRUD
