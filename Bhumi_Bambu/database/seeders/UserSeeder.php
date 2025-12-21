@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
         //Admin
         \App\Models\User::create([
             'nama_user' => 'Ghefira Meyta',
-            'email' => 'ghefira@bhumibambu',
+            'email' => 'ghefirameyta@gmail.com',
             'password' => Hash::make('password123'),
             'no_hp' => '082345678901',
             'alamat' => 'Jl. Kenanga No. 12, Bandung',
@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
         //Pelanggan
         \App\Models\User::create([
             'nama_user' => 'Jaehyun',
-            'email' => 'jaehyun@bhumibambu',
+            'email' => 'farahrizkipermatasari@gmail.com',
             'password' => Hash::make('password123'),
             'no_hp' => '081234567890',
             'alamat' => 'Jl. Melati No. 45, Jakarta',

@@ -1,16 +1,29 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PembayaranController;
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 
 
 Route::get('/', [LandingPageController::class, 'index']);
-Route::get('/login', function () {
-    return view('login');   
-})->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login');
+
+Route::get('/login', [LoginController::class, 'login'])->name('login'); // tampilkan form login
+Route::post('/login', [AuthController::class, 'login'])->name('login.authenticate'); // proses login
+
+
+//dashboard//
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])
+        ->name('admin.dashboard');
+
+});
+// Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'admin'])->name('admin.dashboard');
+
 
 Route::get('/pembayaran', [PembayaranController::class, 'index']);
 Route::get('/pembayaran/create', [PembayaranController::class, 'create']);
@@ -70,4 +83,13 @@ Route::middleware(['auth'])->group(function () {
 
 Route::post('/apply-promo', [PemesananController::class, 'applyPromo'])->name('apply.promo');
 
+// Route::get('/login', function () {
+//     return view('login');   
+// })->name('login');
+// Route::post('/login', [LoginController::class, 'authenticate'])->name('login.authenticate');
+// Route::get('/login', [LoginController::class, 'index'])->name('login');
 
+use App\Http\Controllers\PaketLayananController;
+
+// Route::middleware(['auth'])->group(function () {
+Route::resource('paket-layanan', PaketLayananController::class);

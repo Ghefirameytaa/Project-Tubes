@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class PaketLayanan extends Model
 {
-    protected $table = 'Paket_Layanan';
+    protected $table = 'paket_layanan';
 
     protected $fillable = [
         'id_paket',
+        'id_admin',
         'nama_paket',
         'kategori_paket',
         'deskripsi',
