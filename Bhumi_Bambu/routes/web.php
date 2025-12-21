@@ -5,12 +5,33 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PembayaranController;
+<<<<<<< HEAD
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
+=======
+use App\Http\Controllers\PromoController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Route;
+>>>>>>> 59c6640e23d68cdd21ed2ba75c256de1aba0fe83
 
+Route::middleware(['web'])->group(function () {
+    Route::get('/login', [LoginController::class, 'login'])->name('login');
+    Route::post('/login', [LoginController::class, 'authenticate']);
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard')
+        ->middleware('auth');
+});
+
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [LandingPageController::class, 'index']);
 
+<<<<<<< HEAD
 Route::get('/login', [LoginController::class, 'login'])->name('login'); // tampilkan form login
 Route::post('/login', [AuthController::class, 'login'])->name('login.authenticate'); // proses login
 
@@ -24,14 +45,42 @@ Route::middleware(['auth'])->group(function () {
 });
 // Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'admin'])->name('admin.dashboard');
 
+=======
+Route::get('/login', [LoginController::class, 'login'])->name('login.submit');
+Route::get('/login', function () {
+    return view('login');   
+})->name('login');
 
+Route::post('/login', [LoginController::class, 'login'])->name('login');
+>>>>>>> 59c6640e23d68cdd21ed2ba75c256de1aba0fe83
+
+
+
+
+// READ - List semua pembayaran (dengan filter & search)
 Route::get('/pembayaran', [PembayaranController::class, 'index']);
+
+// CREATE - Form tambah pembayaran baru
 Route::get('/pembayaran/create', [PembayaranController::class, 'create']);
+
+// CREATE - Simpan data pembayaran baru
 Route::post('/pembayaran', [PembayaranController::class, 'store']);
-Route::get('/pembayaran/show', [PembayaranController::class, 'show']); 
+return redirect('/pembayaran')->with('success', 'Pembayaran berhasil ditambahkan');
+
+// READ - Detail pembayaran tertentu
+Route::get('/pembayaran/{id}', [PembayaranController::class, 'show']);
+
+// UPDATE - Form edit pembayaran
 Route::get('/pembayaran/{id}/edit', [PembayaranController::class, 'edit']);
+
+// UPDATE - Simpan perubahan pembayaran
 Route::put('/pembayaran/{id}', [PembayaranController::class, 'update']);
+
+// DELETE - Hapus pembayaran
 Route::delete('/pembayaran/{id}', [PembayaranController::class, 'destroy']);
+
+// BONUS - Verifikasi pembayaran (Approve/Reject)
+Route::post('/pembayaran/{id}/verify', [PembayaranController::class, 'verify']);
 
 // Route::get('/', function () {
 //     return view('welcome');

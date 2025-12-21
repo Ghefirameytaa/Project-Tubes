@@ -302,7 +302,7 @@
                 <div  class="promos-content">
                     <div class="promos-code">
                         <i class="fas fa-copy"></i>
-                        <span>BAMBUBM</span>
+                        <span>BAMBUSTART</span>
                     </div>
                 </div>
         </div>
@@ -312,7 +312,7 @@
                 <div class="promos-content">
                     <div class="promos-code">
                         <i class="fas fa-copy"></i>
-                        <span>NATARU25</span>
+                        <span>BAMBUSHOCK</span>
                     </div>
                 </div>
         </div>
@@ -322,7 +322,7 @@
                 <div class="promos-content">
                     <div class="promos-code">
                         <i class="fas fa-copy"></i>
-                        <span>AKHIRTHN</span>
+                        <span>BAMBUFEST</span>
                     </div>
                 </div>
         </div>
