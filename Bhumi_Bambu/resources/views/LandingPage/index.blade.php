@@ -254,7 +254,7 @@
         </nav>
 
         <div class="auth">
-            <a href="{{ route('login') }}" class="btn-login">Masuk</a>
+            <a href="{{ route('') }}" class="btn-login">Masuk</a>
             <a href="#" class="btn-daftar">Daftar</a>
         </div>
     </header>
