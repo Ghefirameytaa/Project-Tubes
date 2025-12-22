@@ -43,7 +43,7 @@ class PembayaranController extends Controller
         try {
             // ✅ Validasi: terima id_pemesanan dari FORM
             $validated = $request->validate([
-                'id_pemesanan' => 'required|integer|min:1',
+                'pemesanan_id' => 'required|integer|min:1',
                 'tanggal_pembayaran' => 'required|date',
                 'metode_pembayaran' => 'required|string',
                 'nama_bank' => 'nullable|string|max:255',
@@ -55,7 +55,7 @@ class PembayaranController extends Controller
 
             // ✅ MAPPING: form (id_pemesanan) → database (pemesanan_id)
             $data = [
-                'pemesanan_id' => $request->id_pemesanan,
+                'pemesanan_id' => $request->pemesanan_id,
                 'tanggal_pembayaran' => $request->tanggal_pembayaran,
                 'metode_pembayaran' => $request->metode_pembayaran,
                 'nama_bank' => $request->nama_bank,
@@ -112,7 +112,7 @@ class PembayaranController extends Controller
     {
         try {
             $validated = $request->validate([
-                'id_pemesanan' => 'required|integer|min:1',
+                'pemesanan_id' => 'required|integer|min:1',
                 'tanggal_pembayaran' => 'required|date',
                 'metode_pembayaran' => 'required|string',
                 'nama_bank' => 'nullable|string|max:255',
@@ -125,7 +125,7 @@ class PembayaranController extends Controller
             $pembayaran = Pembayaran::findOrFail($id);
 
             $data = [
-                'pemesanan_id' => $request->id_pemesanan,
+                'pemesanan_id' => $request->pemesanan_id,
                 'tanggal_pembayaran' => $request->tanggal_pembayaran,
                 'metode_pembayaran' => $request->metode_pembayaran,
                 'nama_bank' => $request->nama_bank,

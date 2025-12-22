@@ -3,13 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Pemesanan;
-use App\Models\User;
 
 class Pembayaran extends Model
 {
     protected $table = 'pembayaran';
-
+    
     protected $fillable = [
         'pemesanan_id',
         'tanggal_pembayaran',
@@ -25,71 +23,45 @@ class Pembayaran extends Model
     ];
 
     protected $casts = [
-        'tanggal_pembayaran' => 'datetime',
-        'waktu_verifikasi'   => 'datetime',
-        'jumlah_bayar'       => 'integer',
+        'tanggal_pembayaran' => 'date',
+        'waktu_verifikasi' => 'datetime',
     ];
 
-    /* ================= RELATION ================= */
-
+    /**
+     * Relasi ke Pemesanan
+     */
     public function pemesanan()
     {
         return $this->belongsTo(Pemesanan::class, 'pemesanan_id');
     }
 
-    public function verifikator()
-    {
-        return $this->belongsTo(User::class, 'verifikasi_oleh');
-    }
-
-    /* ================= STATUS HELPER ================= */
-
-    public function isPending()
-    {
-        return in_array(strtolower($this->status_pembayaran), [
-            'pending', 'menunggu', 'menunggu verifikasi'
-        ]);
-    }
-
-    public function isApproved()
-    {
-        return in_array(strtolower($this->status_pembayaran), [
-            'approved', 'berhasil', 'success'
-        ]);
-    }
-
-    public function isRejected()
-    {
-        return in_array(strtolower($this->status_pembayaran), [
-            'rejected', 'dibatalkan', 'ditolak'
-        ]);
-    }
-
+    /**
+     * Get status badge class for display
+     * 
+     * @return string
+     */
     public function getStatusBadgeClass()
     {
-        if ($this->isPending()) return 'pending';
-        if ($this->isApproved()) return 'success';
-        if ($this->isRejected()) return 'cancel';
-        return 'pending';
+        return match($this->status_pembayaran) {
+            'Pending' => 'pending',
+            'Berhasil' => 'success',
+            'Dibatalkan' => 'cancel',
+            default => 'pending',
+        };
     }
 
+    /**
+     * Get status label for display
+     * 
+     * @return string
+     */
     public function getStatusLabel()
     {
-        if ($this->isPending()) return 'Menunggu Verifikasi';
-        if ($this->isApproved()) return 'Berhasil';
-        if ($this->isRejected()) return 'Dibatalkan';
-        return ucfirst($this->status_pembayaran);
-    }
-
-    /* ================= FORMAT HELPER ================= */
-
-    public function getFormattedAmount()
-    {
-        return 'Rp ' . number_format($this->jumlah_bayar, 0, ',', '.');
-    }
-
-    public function getFormattedDate()
-    {
-        return optional($this->tanggal_pembayaran)->format('d/m/Y') ?? '-';
+        return match($this->status_pembayaran) {
+            'Pending' => 'Menunggu Verifikasi',
+            'Berhasil' => 'Berhasil',
+            'Dibatalkan' => 'Dibatalkan',
+            default => $this->status_pembayaran,
+        };
     }
 }
