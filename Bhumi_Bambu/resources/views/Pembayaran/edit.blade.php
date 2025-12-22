@@ -2,12 +2,14 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Tambah Pembayaran</title>
+    <title>Edit Pembayaran #{{ $pembayaran->id }}</title>
 
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #f5f6f8;
+            margin: 0;
+            padding: 0;
         }
 
         .card {
@@ -19,8 +21,23 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        h2 {
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
+        }
+
+        h2 {
+            margin: 0;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
         }
 
         .form-grid {
@@ -56,27 +73,29 @@
             border-color: #f08a24;
         }
 
-        /* Fix untuk select yang required */
-        select:invalid {
-            color: #999;
-        }
-
-        select option:first-child {
-            color: #999;
-        }
-
-        select option:not(:first-child) {
-            color: #333;
-        }
-
         .full {
             grid-column: span 2;
         }
 
-        /* File Upload Styling */
+        /* File Upload */
         .file-upload-wrapper {
             position: relative;
             margin-top: 5px;
+        }
+
+        .current-image {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .current-image img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            cursor: pointer;
         }
 
         .file-upload {
@@ -154,23 +173,14 @@
             color: #fff;
         }
 
-        .btn-batal:hover {
-            background: #c5c5c5;
-        }
-
-        .btn-simpan:hover {
-            background: #db7b1f;
+        .btn-danger {
+            background: #ff5c5c;
+            color: #fff;
         }
 
         .error {
             color: red;
             font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .helper-text {
-            font-size: 12px;
-            color: #666;
             margin-top: 5px;
         }
 
@@ -185,15 +195,25 @@
             border: 1px solid #f5c6cb;
             color: #721c24;
         }
+
+        .helper-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
 <div class="card">
-    <h2>Tambah Pembayaran</h2>
+    <div class="header">
+        <h2>Edit Pembayaran #{{ $pembayaran->id }}</h2>
+        <a href="/pembayaran" class="btn-back">
+            <i class="fa-solid fa-arrow-left"></i> Kembali
+        </a>
+    </div>
 
-    {{-- Alert Error (kalau ada error dari controller) --}}
     @if(session('error'))
         <div class="alert alert-error">
             <i class="fa-solid fa-exclamation-triangle"></i>
@@ -201,31 +221,15 @@
         </div>
     @endif
 
-    {{-- FORM UTAMA - Yang Penting: action, method, enctype, @csrf --}}
-    <form action="/pembayaran" method="POST" enctype="multipart/form-data" id="paymentForm">
+    <form action="/pembayaran/{{ $pembayaran->id }}" method="POST" enctype="multipart/form-data">
         @csrf
+        @method('PUT')
         
         <div class="form-grid">
             <!-- ID Pemesanan -->
             <div class="form-group">
                 <label>ID Pemesanan <span>*</span></label>
-                @if(isset($pemesanan) && $pemesanan->isEmpty())
-                    {{-- Kalau belum ada data pemesanan, input manual --}}
-                    <input type="number" name="id_pemesanan" placeholder="Masukkan ID Pemesanan" value="{{ old('id_pemesanan') }}" required min="1">
-                    <span class="helper-text">⚠️ Belum ada data pemesanan. Masukkan ID pemesanan manual.</span>
-                @else
-                    {{-- Kalau ada data pemesanan, dropdown --}}
-                    <select name="id_pemesanan" id="id_pemesanan" required>
-                        <option value="" disabled selected>-- Pilih Pemesanan --</option>
-                        @if(isset($pemesanan))
-                            @foreach($pemesanan as $item)
-                                <option value="{{ $item->id }}" {{ old('id_pemesanan') == $item->id ? 'selected' : '' }}>
-                                    Pemesanan #{{ $item->id }} - Rp {{ number_format($item->total_harga ?? 0, 0, ',', '.') }}
-                                </option>
-                            @endforeach
-                        @endif
-                    </select>
-                @endif
+                <input type="number" name="id_pemesanan" value="{{ old('id_pemesanan', $pembayaran->id_pemesanan) }}" required min="1">
                 @error('id_pemesanan')
                     <span class="error">{{ $message }}</span>
                 @enderror
@@ -234,7 +238,7 @@
             <!-- Tanggal Pembayaran -->
             <div class="form-group">
                 <label>Tanggal Pembayaran <span>*</span></label>
-                <input type="date" name="tanggal_pembayaran" value="{{ old('tanggal_pembayaran', date('Y-m-d')) }}" required>
+                <input type="date" name="tanggal_pembayaran" value="{{ old('tanggal_pembayaran', $pembayaran->tanggal_pembayaran->format('Y-m-d')) }}" required>
                 @error('tanggal_pembayaran')
                     <span class="error">{{ $message }}</span>
                 @enderror
@@ -243,11 +247,11 @@
             <!-- Metode Pembayaran -->
             <div class="form-group">
                 <label>Metode Pembayaran <span>*</span></label>
-                <select name="metode_pembayaran" id="metode_pembayaran" required>
-                    <option value="" disabled selected>-- Pilih Metode --</option>
-                    <option value="Transfer Bank" {{ old('metode_pembayaran') == 'Transfer Bank' ? 'selected' : '' }}>Transfer Bank</option>
-                    <option value="E-Wallet" {{ old('metode_pembayaran') == 'E-Wallet' ? 'selected' : '' }}>E-Wallet</option>
-                    <option value="Cash" {{ old('metode_pembayaran') == 'Cash' ? 'selected' : '' }}>Cash</option>
+                <select name="metode_pembayaran" required>
+                    <option value="" disabled>-- Pilih Metode --</option>
+                    <option value="Transfer Bank" {{ old('metode_pembayaran', $pembayaran->metode_pembayaran) == 'Transfer Bank' ? 'selected' : '' }}>Transfer Bank</option>
+                    <option value="E-Wallet" {{ old('metode_pembayaran', $pembayaran->metode_pembayaran) == 'E-Wallet' ? 'selected' : '' }}>E-Wallet</option>
+                    <option value="Cash" {{ old('metode_pembayaran', $pembayaran->metode_pembayaran) == 'Cash' ? 'selected' : '' }}>Cash</option>
                 </select>
                 @error('metode_pembayaran')
                     <span class="error">{{ $message }}</span>
@@ -257,7 +261,7 @@
             <!-- Nama Bank -->
             <div class="form-group">
                 <label>Nama Bank / E-Wallet</label>
-                <input type="text" name="nama_bank" placeholder="Contoh: BCA, Mandiri, GoPay" value="{{ old('nama_bank') }}">
+                <input type="text" name="nama_bank" placeholder="Contoh: BCA, Mandiri, GoPay" value="{{ old('nama_bank', $pembayaran->nama_bank) }}">
                 @error('nama_bank')
                     <span class="error">{{ $message }}</span>
                 @enderror
@@ -266,7 +270,7 @@
             <!-- Nama Pengirim -->
             <div class="form-group">
                 <label>Nama Pengirim</label>
-                <input type="text" name="nama_pengirim" placeholder="Nama sesuai rekening" value="{{ old('nama_pengirim') }}">
+                <input type="text" name="nama_pengirim" placeholder="Nama sesuai rekening" value="{{ old('nama_pengirim', $pembayaran->nama_pengirim) }}">
                 @error('nama_pengirim')
                     <span class="error">{{ $message }}</span>
                 @enderror
@@ -275,7 +279,7 @@
             <!-- Jumlah Bayar -->
             <div class="form-group">
                 <label>Jumlah Bayar <span>*</span></label>
-                <input type="number" name="jumlah_bayar" id="jumlah_bayar" placeholder="100000" value="{{ old('jumlah_bayar') }}" required min="0">
+                <input type="number" name="jumlah_bayar" placeholder="100000" value="{{ old('jumlah_bayar', $pembayaran->jumlah_bayar) }}" required min="0">
                 @error('jumlah_bayar')
                     <span class="error">{{ $message }}</span>
                 @enderror
@@ -286,9 +290,9 @@
                 <label>Status Pembayaran <span>*</span></label>
                 <select name="status_pembayaran" required>
                     <option value="" disabled>-- Pilih Status --</option>
-                    <option value="Menunggu" {{ old('status_pembayaran', 'Menunggu') == 'Menunggu' ? 'selected' : '' }}>Menunggu Verifikasi</option>
-                    <option value="Berhasil" {{ old('status_pembayaran') == 'Berhasil' ? 'selected' : '' }}>Berhasil</option>
-                    <option value="Dibatalkan" {{ old('status_pembayaran') == 'Dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+                    <option value="Menunggu" {{ old('status_pembayaran', $pembayaran->status_pembayaran) == 'Menunggu' ? 'selected' : '' }}>Menunggu Verifikasi</option>
+                    <option value="Berhasil" {{ old('status_pembayaran', $pembayaran->status_pembayaran) == 'Berhasil' ? 'selected' : '' }}>Berhasil</option>
+                    <option value="Dibatalkan" {{ old('status_pembayaran', $pembayaran->status_pembayaran) == 'Dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
                 </select>
                 @error('status_pembayaran')
                     <span class="error">{{ $message }}</span>
@@ -298,18 +302,43 @@
             <!-- Upload Bukti Pembayaran -->
             <div class="form-group full">
                 <label>Bukti Pembayaran</label>
+                
+                @if($pembayaran->bukti_pembayaran)
+                    <div class="current-image">
+                        <p style="margin: 0 0 10px 0; font-weight: 600; color: #666;">
+                            <i class="fa-solid fa-image"></i> Bukti Saat Ini:
+                        </p>
+                        <img src="{{ asset('storage/' . $pembayaran->bukti_pembayaran) }}" 
+                             alt="Bukti Pembayaran"
+                             onclick="window.open(this.src, '_blank')">
+                        <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
+                            <i class="fa-solid fa-info-circle"></i> Klik gambar untuk melihat ukuran penuh
+                        </p>
+                    </div>
+                @endif
+                
                 <div class="file-upload-wrapper">
                     <div class="file-upload" id="fileUpload" onclick="document.getElementById('bukti_pembayaran').click()">
                         <i class="fa-solid fa-cloud-arrow-up"></i>
-                        <p id="uploadText">Klik untuk upload bukti pembayaran<br>
-                        <small>Format: JPG, PNG, JPEG (Max 2MB)</small></p>
+                        <p id="uploadText">
+                            @if($pembayaran->bukti_pembayaran)
+                                Klik untuk ganti bukti pembayaran
+                            @else
+                                Klik untuk upload bukti pembayaran
+                            @endif
+                            <br><small>Format: JPG, PNG, JPEG (Max 2MB)</small>
+                        </p>
                     </div>
                     <input type="file" name="bukti_pembayaran" id="bukti_pembayaran" accept="image/jpeg,image/png,image/jpg" onchange="previewImage(event)">
+                    <span class="helper-text">* Opsional - Kosongkan jika tidak ingin mengubah bukti</span>
                     @error('bukti_pembayaran')
                         <span class="error">{{ $message }}</span>
                     @enderror
                     
                     <div id="imagePreview">
+                        <p style="margin-bottom: 10px; color: #17b890; font-weight: 600;">
+                            <i class="fa-solid fa-check-circle"></i> Preview Bukti Baru:
+                        </p>
                         <img id="preview" src="" alt="Preview">
                     </div>
                 </div>
@@ -318,8 +347,23 @@
 
         <div class="actions">
             <a href="/pembayaran" class="btn btn-batal">Batal</a>
-            <button type="submit" class="btn btn-simpan">Simpan</button>
+            <button type="submit" class="btn btn-simpan">
+                <i class="fa-solid fa-save"></i> Update
+            </button>
         </div>
+    </form>
+
+    <!-- Form Delete (Separate) -->
+    <form action="/pembayaran/{{ $pembayaran->id }}" method="POST" style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #eee;" onsubmit="return confirm('PERHATIAN: Data pembayaran akan dihapus permanen! Yakin ingin menghapus?')">
+        @csrf
+        @method('DELETE')
+        <p style="color: #666; margin-bottom: 15px;">
+            <i class="fa-solid fa-exclamation-triangle" style="color: #ff5c5c;"></i>
+            <strong>Zona Bahaya:</strong> Hapus pembayaran ini secara permanen
+        </p>
+        <button type="submit" class="btn btn-danger">
+            <i class="fa-solid fa-trash"></i> Hapus Pembayaran
+        </button>
     </form>
 </div>
 
@@ -341,7 +385,7 @@
 
             // Update upload area
             uploadDiv.classList.add('has-file');
-            uploadText.innerHTML = `<i class="fa-solid fa-check-circle" style="color: #17b890;"></i><br>${file.name}<br><small>File berhasil dipilih</small>`;
+            uploadText.innerHTML = `<i class="fa-solid fa-check-circle" style="color: #17b890;"></i><br>${file.name}<br><small>File baru dipilih</small>`;
 
             // Show preview
             const reader = new FileReader();
@@ -352,64 +396,6 @@
             reader.readAsDataURL(file);
         }
     }
-
-    // Fix untuk select styling saat ada value
-    const metodeSelect = document.getElementById('metode_pembayaran');
-    if (metodeSelect) {
-        metodeSelect.addEventListener('change', function() {
-            this.style.color = '#333';
-        });
-    }
-
-    // Auto-fill jumlah bayar berdasarkan pemesanan yang dipilih (jika ada dropdown)
-    const pemesananSelect = document.getElementById('id_pemesanan');
-    if (pemesananSelect) {
-        pemesananSelect.addEventListener('change', function() {
-            this.style.color = '#333';
-            
-            const selectedOption = this.options[this.selectedIndex];
-            const hargaText = selectedOption.text;
-            
-            // Extract harga dari text "Pemesanan #1 - Rp 500.000"
-            const match = hargaText.match(/Rp\s([\d.,]+)/);
-            if (match) {
-                const harga = match[1].replace(/\./g, '').replace(',', '');
-                document.getElementById('jumlah_bayar').value = harga;
-            }
-        });
-    }
-
-    // Debug: Log saat form di-submit
-    document.getElementById('paymentForm').addEventListener('submit', function(e) {
-        console.log('Form submitted!');
-        console.log('Action:', this.action);
-        console.log('Method:', this.method);
-        
-        // Validasi manual
-        const requiredFields = [
-            'id_pemesanan',
-            'tanggal_pembayaran',
-            'metode_pembayaran',
-            'jumlah_bayar',
-            'status_pembayaran'
-        ];
-        
-        let allFilled = true;
-        requiredFields.forEach(field => {
-            const input = document.querySelector(`[name="${field}"]`);
-            if (!input || !input.value) {
-                console.error(`Field ${field} kosong!`);
-                allFilled = false;
-            } else {
-                console.log(`${field}:`, input.value);
-            }
-        });
-        
-        if (!allFilled) {
-            e.preventDefault();
-            alert('Mohon isi semua field yang wajib diisi (*)');
-        }
-    });
 </script>
 
 </body>

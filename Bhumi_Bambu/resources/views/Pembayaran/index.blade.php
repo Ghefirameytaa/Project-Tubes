@@ -432,10 +432,10 @@
                     @forelse($pembayaran as $item)
                         <tr>
                             <td><strong>#{{ $item->id }}</strong></td>
-                            <td>{{ $item->id_pemesanan }}</td>
+                            <td>{{ $item->pemesanan_id }}</td>
                             <td>{{ $item->nama_pengirim ?? '-' }}</td>
                             <td>{{ $item->nama_bank ?? $item->metode_pembayaran }}</td>
-                            <td>{{ $item->tanggal_pembayaran->format('d/m/Y') }}</td>
+                            <td>{{ optional($item->tanggal_pembayaran)->format('d/m/Y') }}</td>
                             <td><strong style="color: #17b890;">Rp {{ number_format($item->jumlah_bayar, 0, ',', '.') }}</strong></td>
                             <td>
                                 <span class="status {{ $item->getStatusBadgeClass() }}">

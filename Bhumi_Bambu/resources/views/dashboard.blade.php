@@ -1,201 +1,220 @@
-@extends('layouts.admin')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<<<<<<< HEAD
+    <meta charset="UTF-8">
+    <title>Dashboard Admin</title>
 
-@section('title', 'Dashboard')
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
 
-@section('content')
-<div class="container-fluid px-4">
-    <!-- Search Bar -->
-    <div class="row mb-4 mt-4">
-        <div class="col-md-6">
-            <div class="input-group shadow-sm">
-                <span class="input-group-text bg-white border-end-0">
-                    <i class="fas fa-search text-muted"></i>
-                </span>
-                <input type="text" class="form-control border-start-0" placeholder="Cari" id="searchInput">
-            </div>
-        </div>
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <span class="navbar-brand">Dashboard Admin</span>
+
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button class="btn btn-danger btn-sm">Logout</button>
+        </form>
+=======
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Bhumi Bambu</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Selamat Datang, {{ session('user_name') }}</h1>
+
+    <div class="row my-4">
+        <div class="col-md-3"><div class="card p-3 bg-success text-white text-center">Acara Berlangsung: <h2>{{ $acaraBerlangsung }}</h2></div></div>
+        <div class="col-md-3"><div class="card p-3 bg-warning text-white text-center">Menunggu Konfirmasi: <h2>{{ $menungguKonfirmasi }}</h2></div></div>
+        <div class="col-md-3"><div class="card p-3 bg-primary text-white text-center">Acara Selesai: <h2>{{ $acaraSelesai }}</h2></div></div>
+        <div class="col-md-3"><div class="card p-3 bg-secondary text-white text-center">Venue Terpakai: <h2>{{ $venueTerpakai }}</h2></div></div>
+>>>>>>> 59c6640e23d68cdd21ed2ba75c256de1aba0fe83
     </div>
+</nav>
 
-    <!-- Statistics Cards -->
-    <div class="row g-3 mb-4">
-        <!-- Acara Berlangsung -->
+<<<<<<< HEAD
+<div class="container mt-4">
+
+    <h4 class="mb-3">Tanggal: {{ $tanggal }}</h4>
+
+    <!-- KARTU STATISTIK -->
+    <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card stat-card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #2d5f3f 0%, #3a7750 100%); border-radius: 12px;">
-                <div class="card-body text-white p-4">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="card-subtitle mb-2" style="opacity: 0.85; font-size: 14px;">Acara<br>Berlangsung</h6>
-                            <h1 class="card-title fw-bold mb-0" style="font-size: 48px;">{{ $acaraBerlangsung }}</h1>
-                        </div>
-                        <div class="stat-icon bg-white bg-opacity-25 p-3 rounded-circle">
-                            <i class="fas fa-calendar-check" style="font-size: 28px;"></i>
-                        </div>
-                    </div>
+            <div class="card text-bg-primary">
+                <div class="card-body">
+                    <h6>Acara Berlangsung</h6>
+                    <h3>{{ $acaraBerlangsung }}</h3>
                 </div>
             </div>
         </div>
 
-        <!-- Menunggu Konfirmasi -->
         <div class="col-md-3">
-            <div class="card stat-card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #2d5f3f 0%, #3a7750 100%); border-radius: 12px;">
-                <div class="card-body text-white p-4">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="card-subtitle mb-2" style="opacity: 0.85; font-size: 14px;">Menunggu<br>Konfirmasi</h6>
-                            <h1 class="card-title fw-bold mb-0" style="font-size: 48px;">{{ $menungguKonfirmasi }}</h1>
-                        </div>
-                        <div class="stat-icon bg-white bg-opacity-25 p-3 rounded-circle">
-                            <i class="fas fa-user-clock" style="font-size: 28px;"></i>
-                        </div>
-                    </div>
+            <div class="card text-bg-warning">
+                <div class="card-body">
+                    <h6>Menunggu Konfirmasi</h6>
+                    <h3>{{ $menungguKonfirmasi }}</h3>
                 </div>
             </div>
         </div>
 
-        <!-- Acara Selesai -->
         <div class="col-md-3">
-            <div class="card stat-card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #2d5f3f 0%, #3a7750 100%); border-radius: 12px;">
-                <div class="card-body text-white p-4">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="card-subtitle mb-2" style="opacity: 0.85; font-size: 14px;">Acara<br>Selesai</h6>
-                            <h1 class="card-title fw-bold mb-0" style="font-size: 48px;">{{ $acaraSelesai }}</h1>
-                        </div>
-                        <div class="stat-icon bg-white bg-opacity-25 p-3 rounded-circle">
-                            <i class="fas fa-check-circle" style="font-size: 28px;"></i>
-                        </div>
-                    </div>
+            <div class="card text-bg-success">
+                <div class="card-body">
+                    <h6>Acara Selesai</h6>
+                    <h3>{{ $acaraSelesai }}</h3>
                 </div>
             </div>
         </div>
 
-        <!-- Venue Terpakai -->
         <div class="col-md-3">
-            <div class="card stat-card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #2d5f3f 0%, #3a7750 100%); border-radius: 12px;">
-                <div class="card-body text-white p-4">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="card-subtitle mb-2" style="opacity: 0.85; font-size: 14px;">Venue<br>Terpakai</h6>
-                            <h1 class="card-title fw-bold mb-0" style="font-size: 48px;">{{ $venueTerpakai }}</h1>
-                        </div>
-                        <div class="stat-icon bg-white bg-opacity-25 p-3 rounded-circle">
-                            <i class="fas fa-campground" style="font-size: 28px;"></i>
-                        </div>
-                    </div>
+            <div class="card text-bg-dark">
+                <div class="card-body">
+                    <h6>Venue Terpakai</h6>
+                    <h3>{{ $venueTerpakai }}</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Detail Pelanggan -->
-    <div class="card border-0 shadow-sm" style="border-radius: 12px;">
-        <div class="card-header bg-white border-bottom py-3" style="border-radius: 12px 12px 0 0;">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">Detail Pelanggan</h5>
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ \Carbon\Carbon::parse($tanggal)->format('d F Y') }}
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dateDropdown">
-                        <li><a class="dropdown-item" href="{{ route('admin.dashboard', ['tanggal' => now()->format('Y-m-d')]) }}">Hari Ini</a></li>
-                        <li><a class="dropdown-item" href="{{ route('admin.dashboard', ['tanggal' => now()->addDay()->format('Y-m-d')]) }}">Besok</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li class="px-3">
-                            <form action="{{ route('admin.dashboard') }}" method="GET">
-                                <label class="form-label small">Pilih Tanggal</label>
-                                <input type="date" name="tanggal" class="form-control form-control-sm" value="{{ $tanggal }}" onchange="this.form.submit()">
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+    <!-- TABEL DETAIL -->
+    <div class="card">
+        <div class="card-header">
+            <strong>Detail Acara Pelanggan</strong>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
-                    <thead style="background-color: #f8f9fa;">
-                        <tr>
-                            <th class="px-4 py-3 fw-semibold text-secondary" style="font-size: 13px;">Nama Paket</th>
-                            <th class="py-3 fw-semibold text-secondary" style="font-size: 13px;">Nama Pelanggan</th>
-                            <th class="py-3 fw-semibold text-secondary" style="font-size: 13px;">Tanggal Acara</th>
-                            <th class="py-3 fw-semibold text-secondary" style="font-size: 13px;">Total Harga</th>
-                            <th class="py-3 fw-semibold text-secondary" style="font-size: 13px;">Venue</th>
-                            <th class="py-3 fw-semibold text-secondary" style="font-size: 13px;">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        @forelse($detailPelanggan as $item)
-                        <tr>
-                            <td class="px-4 py-3">{{ $item['nama_paket'] }}</td>
-                            <td class="py-3">{{ $item['nama_pelanggan'] }}</td>
-                            <td class="py-3">
-                                <div>{{ $item['tanggal_acara'] }}</div>
-                                <small class="text-muted">{{ $item['waktu_mulai'] }}</small>
-                            </td>
-                            <td class="py-3 fw-semibold">{{ $item['total_harga'] }}</td>
-                            <td class="py-3">{{ $item['venue'] }}</td>
-                            <td class="py-3">
-                                @if($item['status'] === 'berhasil')
-                                    <span class="badge rounded-pill px-3 py-2" style="background-color: #10b981; font-size: 12px;">{{ $item['status_label'] }}</span>
-                                @elseif($item['status'] === 'menunggu')
-                                    <span class="badge rounded-pill px-3 py-2" style="background-color: #f59e0b; font-size: 12px;">{{ $item['status_label'] }}</span>
-                                @elseif($item['status'] === 'dibatalkan')
-                                    <span class="badge rounded-pill px-3 py-2" style="background-color: #ef4444; font-size: 12px;">{{ $item['status_label'] }}</span>
-                                @else
-                                    <span class="badge rounded-pill px-3 py-2" style="background-color: #3b82f6; font-size: 12px;">{{ $item['status_label'] }}</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="text-muted">
-                                    <i class="fas fa-calendar-times fa-3x mb-3 d-block opacity-25"></i>
-                                    <p class="mb-0">Tidak ada acara pada tanggal ini</p>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Paket</th>
+                        <th>Pelanggan</th>
+                        <th>Tanggal</th>
+                        <th>Waktu</th>
+                        <th>Total</th>
+                        <th>Venue</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($detailPelanggan as $item)
+                    <tr>
+                        <td>{{ $item['nama_paket'] }}</td>
+                        <td>{{ $item['nama_pelanggan'] }}</td>
+                        <td>{{ $item['tanggal_acara'] }}</td>
+                        <td>{{ $item['waktu_mulai'] }}</td>
+                        <td>{{ $item['total_harga'] }}</td>
+                        <td>{{ $item['venue'] }}</td>
+                        <td>
+                            <span class="badge bg-{{ $item['status_color'] }}">
+                                {{ $item['status_label'] }}
+                            </span>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
+
 </div>
 
-@push('styles')
-<style>
-    .stat-card {
-        transition: all 0.3s ease;
-    }
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
-    }
-    .stat-icon i {
-        opacity: 0.8;
-    }
-    .table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-    .table tbody tr:hover {
-        background-color: #f8f9fa;
-    }
-</style>
-@endpush
+</body>
+</html>
 
-@push('scripts')
-<script>
-    // Search functionality
-    document.getElementById('searchInput').addEventListener('keyup', function() {
-        let filter = this.value.toLowerCase();
-        let rows = document.querySelectorAll('#tableBody tr');
+
+// namespace App\Http\Controllers;
+
+// use Illuminate\Http\Request;
+
+// class DashboardController extends Controller
+// {
+//     public function index(Request $request)
+//     {
+//         // Dummy data supaya view bisa jalan
+//         $tanggal = $request->get('tanggal', now()->format('Y-m-d'));
+
+//         $acaraBerlangsung = 0;
+//         $menungguKonfirmasi = 0;
+//         $acaraSelesai = 0;
+//         $venueTerpakai = 0;
+
+//         $detailPelanggan = [
+//             [
+//                 'nama_paket' => 'Paket A',
+//                 'nama_pelanggan' => 'John Doe',
+//                 'tanggal_acara' => date('d F Y'),
+//                 'waktu_mulai' => '10.00 WIB',
+//                 'total_harga' => 'Rp1.000.000',
+//                 'venue' => 'Bhumi Bambu 1',
+//                 'status' => 'berlangsung',
+//                 'status_label' => 'Berlangsung',
+//                 'status_color' => 'primary',
+//             ],
+//             [
+//                 'nama_paket' => 'Paket B',
+//                 'nama_pelanggan' => 'Jane Doe',
+//                 'tanggal_acara' => date('d F Y'),
+//                 'waktu_mulai' => '13.00 WIB',
+//                 'total_harga' => 'Rp2.000.000',
+//                 'venue' => 'Bhumi Bambu 2',
+//                 'status' => 'menunggu',
+//                 'status_label' => 'Menunggu',
+//                 'status_color' => 'warning',
+//             ],
+//         ];
+
+//         return view('dashboard', compact(
+//             'tanggal',
+//             'acaraBerlangsung',
+//             'menungguKonfirmasi',
+//             'acaraSelesai',
+//             'venueTerpakai',
+//             'detailPelanggan'
+//         ));
+
         
-        rows.forEach(row => {
-            let text = row.textContent.toLowerCase();
-            row.style.display = text.includes(filter) ? '' : 'none';
-        });
-    });
-</script>
-@endpush
-@endsection
+//     }
+// }
+=======
+    <h3>Detail Pelanggan ({{ $tanggal }})</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nama Paket</th>
+                <th>Nama Pelanggan</th>
+                <th>Tanggal Acara</th>
+                <th>Waktu Mulai</th>
+                <th>Total Harga</th>
+                <th>Venue</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($detailPelanggan as $item)
+            <tr>
+                <td>{{ $item['nama_paket'] }}</td>
+                <td>{{ $item['nama_pelanggan'] }}</td>
+                <td>{{ $item['tanggal_acara'] }}</td>
+                <td>{{ $item['waktu_mulai'] }}</td>
+                <td>{{ $item['total_harga'] }}</td>
+                <td>{{ $item['venue'] }}</td>
+                <td>{{ $item['status_label'] }}</td>
+            </tr>
+            @empty
+            <tr><td colspan="7" class="text-center">Tidak ada acara hari ini</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <a href="{{ route('logout') }}" class="btn btn-danger">Logout</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+>>>>>>> 59c6640e23d68cdd21ed2ba75c256de1aba0fe83
