@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
 
 class LoginController extends Controller
 {
@@ -28,12 +26,19 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $request->has('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/admin/dashboard');
+
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+
+            return redirect()->route('pelanggan.home');
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah',
-        ]);
+
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
+
     }
     
     public function logout(Request $request)
@@ -41,6 +46,7 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/');
     }
 }

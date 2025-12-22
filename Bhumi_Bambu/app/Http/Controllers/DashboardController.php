@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Acara;
 use App\Models\Pemesanan;
@@ -10,6 +11,14 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Bisa kirim data dummy kalau mau
+        $data = [
+            'welcome' => 'Selamat datang di dashboard admin!'
+        ];
+
+        return view('dashboard', $data);
+    }
+}
         // Tanggal dari query string, default hari ini
         $tanggal = request()->get('tanggal', date('Y-m-d'));
 
@@ -46,5 +55,4 @@ class DashboardController extends Controller
             'detailPelanggan',
             'tanggal'
         ));
-    }
-}
+
