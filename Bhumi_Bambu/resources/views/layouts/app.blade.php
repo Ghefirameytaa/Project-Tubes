@@ -88,7 +88,9 @@
 
     <div class="menu">
       <a href="#"><i class="bi bi-house-door"></i> Dashboard</a>
-      <a class="active" href="{{ route('pesanan.index') }}"><i class="bi bi-receipt"></i> Pesanan</a>
+      <a class="{{ request()->routeIs('pesanan.*') ? 'active' : '' }}" href="{{ route('pesanan.index') }}">
+        <i class="bi bi-receipt"></i> Pesanan
+      </a>
       <a href="#"><i class="bi bi-credit-card"></i> Pembayaran</a>
       <a href="#"><i class="bi bi-box-seam"></i> Paket</a>
       <a href="#"><i class="bi bi-tags"></i> Promo</a>

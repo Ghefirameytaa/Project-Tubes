@@ -1,34 +1,36 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Models;
 
-return new class extends Migration
+use Illuminate\Database\Eloquent\Model;
+
+class Pesanan extends Model
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    protected $table = 'pesanan';
+
+    protected $fillable = [
+        'nama_pemesan',
+        'id_pelanggan',
+        'id_paket',
+        'id_promo',
+        'tanggal_pesanan',
+        'status_pesanan',
+        'total_harga',
+    ];
+
+    // Relasi (kalau modelnya ada)
+    public function pelanggan()
     {
-        Schema::create('pesanan', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama_pemesan');
-            $table->unsignedBigInteger('id_pelanggan')->nullable();
-            $table->unsignedBigInteger('id_paket')->nullable();
-            $table->unsignedBigInteger('id_promo')->nullable();
-            $table->date('tanggal_pesanan');
-            $table->integer('total_harga');
-            $table->string('status_pesanan');
-            $table->timestamps();
-        });
+        return $this->belongsTo(Pelanggan::class, 'id_pelanggan');
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function paket()
     {
-        //
+        return $this->belongsTo(PaketLayanan::class, 'id_paket');
     }
-};
+
+    public function promo()
+    {
+        return $this->belongsTo(Promo::class, 'id_promo');
+    }
+}
