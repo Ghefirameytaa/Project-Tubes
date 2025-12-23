@@ -2,20 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Pesanan;
 use App\Models\Pelanggan;
 use App\Models\PaketLayanan;
-use Illuminate\Http\Request;
 
 class PesananController extends Controller
 {
     public function index()
     {
-        $pesanan = Pesanan::with(['pelanggan', 'paket'])->orderByDesc('id')->get();
-        $pelanggan = Pelanggan::orderBy('nama_pelanggan')->get();
-        $paket = PaketLayanan::orderBy('nama_paket')->get();
+        $pesanan = Pesanan::with(['paket','pelanggan'])
+            ->orderByDesc('id')
+            ->get();
 
-        return view('pesanan.index', compact('pesanan', 'pelanggan', 'paket'));
+        $paket = PaketLayanan::orderBy('nama_paket')->get();
+        $pelanggan = Pelanggan::orderBy('nama_pelanggan')->get();
+
+        return view('pesanan.index', compact('pesanan','paket','pelanggan'));
     }
 
     public function store(Request $request)
@@ -27,6 +30,8 @@ class PesananController extends Controller
             'total_harga' => 'required|numeric|min:0',
             'status_pesanan' => 'required|in:Berhasil,Menunggu,Dibatalkan',
         ]);
+
+        $data['nama_pemesan'] = Pelanggan::where('id', $data['id_pelanggan'])->value('nama_pelanggan') ?? '-';
 
         Pesanan::create($data);
 
@@ -43,9 +48,11 @@ class PesananController extends Controller
             'status_pesanan' => 'required|in:Berhasil,Menunggu,Dibatalkan',
         ]);
 
+        $data['nama_pemesan'] = Pelanggan::where('id', $data['id_pelanggan'])->value('nama_pelanggan') ?? '-';
+
         $pesanan->update($data);
 
-        return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil diupdate');
+        return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil diubah');
     }
 
     public function destroy(Pesanan $pesanan)

@@ -12,21 +12,6 @@
     </button>
   </div>
 
-  @if ($errors->any())
-    <div class="alert alert-danger">
-      <div class="fw-bold mb-1">Form belum benar:</div>
-      <ul class="mb-0">
-        @foreach ($errors->all() as $error)
-          <li>{{ $error }}</li>
-        @endforeach
-      </ul>
-    </div>
-  @endif
-
-  @if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-  @endif
-
   <div class="table-responsive">
     <table class="table align-middle">
       <thead>
@@ -40,44 +25,10 @@
           <th style="width:140px;">Aksi</th>
         </tr>
       </thead>
-      <tbody>
-        @forelse($pesanan as $i => $row)
-          @php
-            $statusClass = match($row->status_pesanan){
-              'Berhasil' => 'status-berhasil',
-              'Menunggu' => 'status-menunggu',
-              'Dibatalkan' => 'status-dibatalkan',
-              default => 'status-menunggu',
-            };
-            $modalId = 'modalEdit_' . $row->id;
-          @endphp
-
-          <tr>
-            <td>{{ $i+1 }}</td>
-            <td>{{ $row->paket?->nama_paket ?? '-' }}</td>
-            <td>{{ $row->pelanggan?->nama_pelanggan ?? '-' }}</td>
-            <td>{{ \Carbon\Carbon::parse($row->tanggal_pesanan)->format('d M Y') }}</td>
-            <td>Rp{{ number_format($row->total_harga, 0, ',', '.') }}</td>
-            <td><span class="status-pill {{ $statusClass }}">{{ $row->status_pesanan }}</span></td>
-            <td class="d-flex gap-2">
-              <button type="button" class="icon-btn" title="Edit" data-bs-toggle="modal" data-bs-target="#{{ $modalId }}">
-                <i class="bi bi-pencil text-warning"></i>
-              </button>
-
-              <form action="{{ route('pesanan.destroy', $row->id) }}" method="POST" onsubmit="return confirm('Yakin hapus pesanan ini?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="icon-btn" title="Hapus">
-                  <i class="bi bi-trash text-danger"></i>
-                </button>
-              </form>
-            </td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="7" class="text-center text-muted py-4">Data kosong</td>
-          </tr>
-        @endforelse
+      <tbody id="pesananTbody">
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">Data kosong</td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -89,42 +40,31 @@
       <div class="modal-body p-4">
         <h4 style="font-weight:900;">Tambah Pesanan</h4>
 
-        <form action="{{ route('pesanan.store') }}" method="POST" class="mt-3">
-          @csrf
+        <form id="formTambah" class="mt-3">
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label fw-bold">Nama Paket *</label>
-              <select name="id_paket" class="form-select" required>
-                <option value="">-- pilih paket --</option>
-                @foreach($paket as $p)
-                  <option value="{{ $p->id }}">{{ $p->nama_paket }}</option>
-                @endforeach
-              </select>
+              <input type="text" class="form-control" id="tambahNamaPaket" placeholder="Ketik nama paket..." required>
             </div>
 
             <div class="col-md-6">
               <label class="form-label fw-bold">Tanggal Acara *</label>
-              <input type="date" name="tanggal_pesanan" class="form-control" required>
+              <input type="date" class="form-control" id="tambahTanggal" required>
             </div>
 
             <div class="col-md-6">
               <label class="form-label fw-bold">Nama Pelanggan *</label>
-              <select name="id_pelanggan" class="form-select" required>
-                <option value="">-- pilih pelanggan --</option>
-                @foreach($pelanggan as $pl)
-                  <option value="{{ $pl->id }}">{{ $pl->nama_pelanggan }}</option>
-                @endforeach
-              </select>
+              <input type="text" class="form-control" id="tambahNamaPelanggan" placeholder="Ketik nama pelanggan..." required>
             </div>
 
             <div class="col-md-6">
               <label class="form-label fw-bold">Total harga *</label>
-              <input type="number" name="total_harga" class="form-control" min="0" required>
+              <input type="number" class="form-control" id="tambahTotal" min="0" placeholder="Contoh: 300000" required>
             </div>
 
             <div class="col-md-6">
               <label class="form-label fw-bold">Status *</label>
-              <select name="status_pesanan" class="form-select" required>
+              <select class="form-select" id="tambahStatus" required>
                 <option value="Berhasil">Berhasil</option>
                 <option value="Menunggu">Menunggu</option>
                 <option value="Dibatalkan">Dibatalkan</option>
@@ -137,75 +77,182 @@
             <button type="submit" class="btn btn-warning px-4 rounded-pill" style="font-weight:800;">Simpan</button>
           </div>
         </form>
+
       </div>
     </div>
   </div>
 </div>
 
-@foreach($pesanan as $row)
-  @php $modalId = 'modalEdit_' . $row->id; @endphp
-  <div class="modal fade" id="{{ $modalId }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content" style="border-radius:18px;">
-        <div class="modal-body p-4">
-          <h4 style="font-weight:900;">Edit Pesanan</h4>
+<div class="modal fade" id="modalEdit" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius:18px;">
+      <div class="modal-body p-4">
+        <h4 style="font-weight:900;">Edit Pesanan</h4>
 
-          <form action="{{ route('pesanan.update', $row->id) }}" method="POST" class="mt-3">
-            @csrf
-            @method('PUT')
+        <form id="formEdit" class="mt-3">
+          <input type="hidden" id="editId">
 
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Nama Paket *</label>
-                <select name="id_paket" class="form-select" required>
-                  @foreach($paket as $p)
-                    <option value="{{ $p->id }}" {{ (int)$row->id_paket === (int)$p->id ? 'selected' : '' }}>
-                      {{ $p->nama_paket }}
-                    </option>
-                  @endforeach
-                </select>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Tanggal Acara *</label>
-                <input type="date" name="tanggal_pesanan" class="form-control" value="{{ $row->tanggal_pesanan }}" required>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Nama Pelanggan *</label>
-                <select name="id_pelanggan" class="form-select" required>
-                  @foreach($pelanggan as $pl)
-                    <option value="{{ $pl->id }}" {{ (int)$row->id_pelanggan === (int)$pl->id ? 'selected' : '' }}>
-                      {{ $pl->nama_pelanggan }}
-                    </option>
-                  @endforeach
-                </select>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Total harga *</label>
-                <input type="number" name="total_harga" class="form-control" min="0" value="{{ $row->total_harga }}" required>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Status *</label>
-                <select name="status_pesanan" class="form-select" required>
-                  <option value="Berhasil" {{ $row->status_pesanan === 'Berhasil' ? 'selected' : '' }}>Berhasil</option>
-                  <option value="Menunggu" {{ $row->status_pesanan === 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
-                  <option value="Dibatalkan" {{ $row->status_pesanan === 'Dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
-                </select>
-              </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Nama Paket *</label>
+              <input type="text" class="form-control" id="editNamaPaket" required>
             </div>
 
-            <div class="d-flex justify-content-end gap-2 mt-4">
-              <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal">Batal</button>
-              <button type="submit" class="btn btn-warning px-4 rounded-pill" style="font-weight:800;">Simpan</button>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Tanggal Acara *</label>
+              <input type="date" class="form-control" id="editTanggal" required>
             </div>
-          </form>
 
-        </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Nama Pelanggan *</label>
+              <input type="text" class="form-control" id="editNamaPelanggan" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Total harga *</label>
+              <input type="number" class="form-control" id="editTotal" min="0" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Status *</label>
+              <select class="form-select" id="editStatus" required>
+                <option value="Berhasil">Berhasil</option>
+                <option value="Menunggu">Menunggu</option>
+                <option value="Dibatalkan">Dibatalkan</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-warning px-4 rounded-pill" style="font-weight:800;">Simpan</button>
+          </div>
+        </form>
+
       </div>
     </div>
   </div>
-@endforeach
+</div>
 @endsection
+
+@push('scripts')
+<script>
+  const KEY = 'pesanan_manual_v1';
+
+  function rupiah(n){
+    const num = Number(n || 0);
+    return 'Rp' + num.toLocaleString('id-ID');
+  }
+
+  function statusClass(status){
+    if(status === 'Berhasil') return 'status-berhasil';
+    if(status === 'Menunggu') return 'status-menunggu';
+    return 'status-dibatalkan';
+  }
+
+  function loadData(){
+    try { return JSON.parse(localStorage.getItem(KEY)) || []; }
+    catch(e){ return []; }
+  }
+
+  function saveData(data){
+    localStorage.setItem(KEY, JSON.stringify(data));
+  }
+
+  function render(){
+    const tbody = document.getElementById('pesananTbody');
+    const data = loadData();
+
+    if(data.length === 0){
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">Data kosong</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map((row, idx) => `
+      <tr>
+        <td>${idx+1}</td>
+        <td>${row.nama_paket}</td>
+        <td>${row.nama_pelanggan}</td>
+        <td>${new Date(row.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' })}</td>
+        <td>${rupiah(row.total)}</td>
+        <td><span class="status-pill ${statusClass(row.status)}">${row.status}</span></td>
+        <td class="d-flex gap-2">
+          <button class="icon-btn" title="Edit" onclick="openEdit('${row.id}')">
+            <i class="bi bi-pencil text-warning"></i>
+          </button>
+          <button class="icon-btn" title="Hapus" onclick="hapus('${row.id}')">
+            <i class="bi bi-trash text-danger"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('formTambah').addEventListener('submit', function(e){
+    e.preventDefault();
+
+    const data = loadData();
+    data.unshift({
+      id: crypto.randomUUID(),
+      nama_paket: document.getElementById('tambahNamaPaket').value.trim(),
+      nama_pelanggan: document.getElementById('tambahNamaPelanggan').value.trim(),
+      tanggal: document.getElementById('tambahTanggal').value,
+      total: document.getElementById('tambahTotal').value,
+      status: document.getElementById('tambahStatus').value
+    });
+
+    saveData(data);
+    render();
+
+    this.reset();
+    bootstrap.Modal.getInstance(document.getElementById('modalTambah')).hide();
+  });
+
+  window.openEdit = function(id){
+    const data = loadData();
+    const row = data.find(x => x.id === id);
+    if(!row) return;
+
+    document.getElementById('editId').value = row.id;
+    document.getElementById('editNamaPaket').value = row.nama_paket;
+    document.getElementById('editNamaPelanggan').value = row.nama_pelanggan;
+    document.getElementById('editTanggal').value = row.tanggal;
+    document.getElementById('editTotal').value = row.total;
+    document.getElementById('editStatus').value = row.status;
+
+    new bootstrap.Modal(document.getElementById('modalEdit')).show();
+  }
+
+  document.getElementById('formEdit').addEventListener('submit', function(e){
+    e.preventDefault();
+
+    const id = document.getElementById('editId').value;
+    const data = loadData();
+    const idx = data.findIndex(x => x.id === id);
+    if(idx === -1) return;
+
+    data[idx] = {
+      id,
+      nama_paket: document.getElementById('editNamaPaket').value.trim(),
+      nama_pelanggan: document.getElementById('editNamaPelanggan').value.trim(),
+      tanggal: document.getElementById('editTanggal').value,
+      total: document.getElementById('editTotal').value,
+      status: document.getElementById('editStatus').value
+    };
+
+    saveData(data);
+    render();
+
+    bootstrap.Modal.getInstance(document.getElementById('modalEdit')).hide();
+  });
+
+  window.hapus = function(id){
+    if(!confirm('Yakin hapus pesanan ini?')) return;
+    const data = loadData().filter(x => x.id !== id);
+    saveData(data);
+    render();
+  }
+
+  render();
+</script>
+@endpush

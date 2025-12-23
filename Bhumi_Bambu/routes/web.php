@@ -53,11 +53,9 @@ Route::get('/', function () {
 });
 
 Route::resource('pesanan', PesananController::class)->only([
-    'index',
-    'store',
-    'update',
-    'destroy'
+    'index','store','update','destroy'
 ]);
+
 
 /*
 |--------------------------------------------------------------------------
