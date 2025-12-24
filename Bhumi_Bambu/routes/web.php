@@ -10,36 +10,46 @@ use App\Http\Controllers\PromoController;
 use App\Http\Controllers\PaketLayananController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['web'])->group(function () {
-    Route::get('/login', [LoginController::class, 'login'])->name('login');
-    Route::post('/login', [LoginController::class, 'authenticate']);
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+/*
+|--------------------------------------------------------------------------
+| CONTROLLERS
+|--------------------------------------------------------------------------
+*/
+// use App\Http\Controllers\LandingPageController;
+// use App\Http\Controllers\LoginController;
+// use App\Http\Controllers\DashboardController;
+// use App\Http\Controllers\PesananController;
+// use App\Http\Controllers\PembayaranController;
+// use App\Http\Controllers\PromoController;
+// use App\Http\Controllers\PaketLayananController;
 
-    Route::get('/admin/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard')
-        ->middleware('auth');
-});
+/*
+|--------------------------------------------------------------------------
+| LANDING PAGE
+|--------------------------------------------------------------------------
+*/
+Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
-Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+/*
+|--------------------------------------------------------------------------
+| LOGIN & LOGOUT (TIDAK MAKSA AUTH KE PEMESANAN)
+|--------------------------------------------------------------------------
+*/
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'authenticate'])->name('login.submit');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('/', [LandingPageController::class, 'index']);
-
-Route::get('/login', [LoginController::class, 'login'])->name('login'); // tampilkan form login
-Route::post('/login', [AuthController::class, 'login'])->name('login.authenticate'); // proses login
-
-
-//dashboard//
-Route::middleware(['auth'])->group(function () {
-
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD (AUTH)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])
         ->name('admin.dashboard');
-
 });
-// Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'admin'])->name('admin.dashboard');
 
+// Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'admin'])->name('admin.dashboard');
 
 Route::get('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::get('/login', function () {
@@ -87,38 +97,55 @@ Route::post('/pembayaran/{id}/verify', [PembayaranController::class, 'verify']);
 */
 
 /*
-| Public
+|--------------------------------------------------------------------------
+| PEMESANAN (INI YANG KAMU PAKAI)
+| URL: /pemesanan
+|--------------------------------------------------------------------------
 */
 
 Route::get('/', function () {
-    return view('landingpage.index');
+    return redirect()->route('pesanan.index');
 });
 
-Route::middleware(['auth'])->group(function () {
-
-    // READ - List promo
-    Route::get('/admin/promo', [PromoController::class, 'index'])->name('promo.index');
-
-    // CREATE - Form tambah promo
-    Route::get('/admin/promo/create', [PromoController::class, 'create'])->name('promo.create');
-    // CREATE - Simpan promo
-    Route::post('/admin/promo', [PromoController::class, 'store'])->name('promo.store');
-
-    // EDIT - Form edit promo
-    Route::get('/admin/promo/{id}/edit', [PromoController::class, 'edit'])->name('promo.edit');
-    // UPDATE - Simpan perubahan promo
-    Route::put('/admin/promo/{id}', [PromoController::class, 'update'])->name('promo.update');
-
-    // DELETE - Hapus promo
-    Route::delete('/admin/promo/{id}', [PromoController::class, 'destroy'])->name('promo.destroy');
-});
+Route::resource('pesanan', PesananController::class)->only([
+    'index','store','update','destroy'
+]);
 
 
 /*
-/ User Apply Promo
-/
+|--------------------------------------------------------------------------
+| PEMBAYARAN (TETAP, TIDAK DIUBAH)
+|--------------------------------------------------------------------------
+*/
+Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran.index');
+Route::get('/pembayaran/create', [PembayaranController::class, 'create'])->name('pembayaran.create');
+Route::post('/pembayaran', [PembayaranController::class, 'store'])->name('pembayaran.store');
+Route::get('/pembayaran/{id}', [PembayaranController::class, 'show'])->name('pembayaran.show');
+Route::get('/pembayaran/{id}/edit', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
+Route::put('/pembayaran/{id}', [PembayaranController::class, 'update'])->name('pembayaran.update');
+Route::delete('/pembayaran/{id}', [PembayaranController::class, 'destroy'])->name('pembayaran.destroy');
+
+/*
+|--------------------------------------------------------------------------
+| PROMO (AUTH)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/promo', [PromoController::class, 'index'])->name('promo.index');
+    Route::get('/admin/promo/create', [PromoController::class, 'create'])->name('promo.create');
+    Route::post('/admin/promo', [PromoController::class, 'store'])->name('promo.store');
+    Route::get('/admin/promo/{id}/edit', [PromoController::class, 'edit'])->name('promo.edit');
+    Route::put('/admin/promo/{id}', [PromoController::class, 'update'])->name('promo.update');
+    Route::delete('/admin/promo/{id}', [PromoController::class, 'destroy'])->name('promo.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| PAKET LAYANAN
+|--------------------------------------------------------------------------
 */
 
 Route::post('/apply-promo', [PemesananController::class, 'applyPromo'])->name('apply.promo');
 
+Route::resource('paket-layanan', PaketLayananController::class);
 
