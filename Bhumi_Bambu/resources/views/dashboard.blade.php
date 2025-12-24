@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<<<<<<< HEAD
     <meta charset="UTF-8">
     <title>Dashboard Admin</title>
 
@@ -18,7 +17,6 @@
             @csrf
             <button class="btn btn-danger btn-sm">Logout</button>
         </form>
-=======
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard Bhumi Bambu</title>
@@ -38,7 +36,6 @@
     </div>
 </nav>
 
-<<<<<<< HEAD
 <div class="container mt-4">
 
     <h4 class="mb-3">Tanggal: {{ $tanggal }}</h4>
@@ -181,7 +178,6 @@
         
 //     }
 // }
-=======
     <h3>Detail Pelanggan ({{ $tanggal }})</h3>
     <table class="table table-bordered">
         <thead>
@@ -217,4 +213,3 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
->>>>>>> 59c6640e23d68cdd21ed2ba75c256de1aba0fe83

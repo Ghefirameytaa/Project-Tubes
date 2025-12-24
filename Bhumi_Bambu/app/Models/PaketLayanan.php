@@ -2,42 +2,28 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PaketLayanan extends Model
 {
+    use HasFactory;
+
     protected $table = 'paket_layanan';
 
     protected $fillable = [
-        'id_paket',
         'id_admin',
         'nama_paket',
-        'kategori_paket',
+        'venue',
+        'harga',
+        'fasilitas',
         'deskripsi',
-        'harga_paket',
-        'durasi',
-        'status_paket',
-        'detail_venue',
+        'kapasitas',
         'gambar_venue',
     ];
 
     public function admin()
     {
         return $this->belongsTo(User::class, 'id_admin');
-    }
-
-    public function pemesanan()
-    {
-        return $this->hasMany(Pemesanan::class, 'id_paket');
-    }
-
-    public function promo()
-    {
-        return $this->hasMany(Promo::class, 'id_paket');
-    }
-
-    public function detailpaketlayanan()
-    {
-        return $this->hasMany(DetailPaketLayanan::class, 'id_paket');
     }
 }

@@ -13,8 +13,8 @@ return new class extends Migration
     {
          Schema::create('feedback', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_pemesanan');
-            $table->foreign('id_pemesanan')->references('id')->on('pemesanan')->onDelete('cascade');
+            $table->unsignedBigInteger('id_pesanan');
+            $table->foreign('id_pesanan')->references('id')->on('pesanan')->onDelete('cascade');
             $table->integer('rating');
             $table->text('komentar');
             $table->date('tanggal_feedback');
