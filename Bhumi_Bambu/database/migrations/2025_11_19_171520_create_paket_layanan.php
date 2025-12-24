@@ -13,15 +13,13 @@ return new class extends Migration
     {
          Schema::create('paket_layanan', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_admin');
-            $table->foreign('id_admin')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('id_admin')->nullable()->change();
             $table->string('nama_paket');
-            $table->string('kategori_paket');
+            $table->string('venue');
+            $table->string('harga');
+            $table->string('fasilitas');
             $table->string('deskripsi');
-            $table->integer('harga_paket');
-            $table->string('durasi');
-            $table->string('status_paket');
-            $table->string('detail_venue');
+            $table->integer('kapasitas');
             $table->string('gambar_venue');
             $table->timestamps();
         });

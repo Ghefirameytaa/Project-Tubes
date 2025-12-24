@@ -1,123 +1,126 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\PaketLayanan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class PaketLayananController extends Controller
 {
-    /* =======================
-        TAMPILKAN DATA
-    ======================== */
     public function index()
     {
-        $paketLayanan = PaketLayanan::all();
-        return view('paketlayanan.index', compact('paketLayanan'));
+        $data = PaketLayanan::latest()->paginate(10);
+        return view('paketlayanan.index', compact('data'));
     }
 
-    /* =======================
-        FORM TAMBAH
-    ======================== */
     public function create()
     {
         return view('paketlayanan.create');
     }
 
-    /* =======================
-        SIMPAN DATA
-    ======================== */
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_paket'     => 'required',
-            'kategori_paket' => 'required',
-            'deskripsi'      => 'required',
-            'harga_paket'    => 'required|numeric',
-            'durasi'         => 'required',
-            'status_paket'   => 'required',
-            'detail_venue'   => 'required',
-            'gambar_venue'   => 'nullable|image|mimes:jpg,jpeg,png'
+        $validated = $request->validate([
+            'nama_paket'   => 'required|string|max:255',
+            'venue'        => 'required|string|max:255',
+            'harga'        => 'required|string|max:255',
+            'fasilitas'    => 'required|string|max:255',
+            'deskripsi'    => 'required|string|max: 255',
+            'kapasitas'    => 'required|integer|min:1',
+            'gambar_venue' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $data = $request->all();
-        $data['id_admin'] = Auth::id();
+        // ✅ upload ke public/aset/gambarPaket
+        $file = $request->file('gambar_venue');
+        $namaFile = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-        // upload gambar
-        if ($request->hasFile('gambar_venue')) {
-            $data['gambar_venue'] = $request->file('gambar_venue')
-                ->store('paket_layanan', 'public');
+        $tujuan = public_path('aset/gambarPaket');
+        if (!is_dir($tujuan)) {
+            mkdir($tujuan, 0755, true);
         }
 
-        PaketLayanan::create($data);
+        $file->move($tujuan, $namaFile);
 
-        return redirect()
-            ->route('paket-layanan.index')
-            ->with('success', 'Paket layanan berhasil ditambahkan');
-    }
+        // ✅ simpan path relatif ke DB (buat asset())
+        $pathDb = 'aset/gambarPaket/' . $namaFile;
 
-    /* =======================
-        FORM EDIT
-    ======================== */
-    public function edit($id_paket)
-    {
-        $paket = PaketLayanan::findOrFail($id_paket);
-        return view('paketlayanan.edit', compact('paket'));
-    }
-
-    /* =======================
-        UPDATE DATA
-    ======================== */
-    public function update(Request $request, $id_paket)
-    {
-        $paket = PaketLayanan::findOrFail($id_paket);
-
-        $request->validate([
-            'nama_paket'     => 'required',
-            'kategori_paket' => 'required',
-            'deskripsi'      => 'required',
-            'harga_paket'    => 'required|numeric',
-            'durasi'         => 'required',
-            'status_paket'   => 'required',
-            'detail_venue'   => 'required',
-            'gambar_venue'   => 'nullable|image|mimes:jpg,jpeg,png'
+        PaketLayanan::create([
+            'nama_paket'   => $validated['nama_paket'],
+            'venue'        => $validated['venue'],
+            'harga'        => $validated['harga'],
+            'fasilitas'    => $validated['fasilitas'],
+            'deskripsi'    => $validated['deskripsi'],
+            'kapasitas'    => $validated['kapasitas'],
+            'gambar_venue' => $pathDb,
         ]);
 
-        $data = $request->all();
+        return redirect()->route('paket-layanan.index')->with('success', 'Data berhasil ditambahkan.');
+    }
 
-        // update gambar
+    public function edit(PaketLayanan $paketLayanan)
+    {
+        return view('paketlayanan.edit', compact('paketLayanan'));
+    }
+
+    public function update(Request $request, PaketLayanan $paketLayanan)
+    {
+        $validated = $request->validate([
+            'nama_paket'   => 'required|string|max:255',
+            'venue'        => 'required|string|max:255',
+            'harga'        => 'required|string|max:255',
+            'fasilitas'    => 'required|string|max:255',
+            'deskripsi'    => 'required|string|max:255',
+            'kapasitas'    => 'required|integer|min:1',
+            'gambar_venue' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        $updateData = [
+            'nama_paket' => $validated['nama_paket'],
+            'venue'      => $validated['venue'],
+            'harga'      => $validated['harga'],
+            'fasilitas'  => $validated['fasilitas'],
+            'deskripsi'  => $validated['deskripsi'],
+            'kapasitas'  => $validated['kapasitas'],
+        ];
+
         if ($request->hasFile('gambar_venue')) {
-            if ($paket->gambar_venue) {
-                Storage::disk('public')->delete($paket->gambar_venue);
+            // hapus gambar lama
+            if (!empty($paketLayanan->gambar_venue)) {
+                $oldPath = public_path($paketLayanan->gambar_venue); // DB simpan 'aset/...'
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
             }
 
-            $data['gambar_venue'] = $request->file('gambar_venue')
-                ->store('paket_layanan', 'public');
+            $file = $request->file('gambar_venue');
+            $namaFile = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+            $tujuan = public_path('aset/gambarPaket');
+            if (!is_dir($tujuan)) {
+                mkdir($tujuan, 0755, true);
+            }
+
+            $file->move($tujuan, $namaFile);
+
+            $updateData['gambar_venue'] = 'aset/gambarPaket/' . $namaFile;
         }
 
-        $paket->update($data);
+        $paketLayanan->update($updateData);
 
-        return redirect()
-            ->route('paket-layanan.index')
-            ->with('success', 'Paket layanan berhasil diperbarui');
+        return redirect()->route('paket-layanan.index')->with('success', 'Data berhasil diupdate.');
     }
 
-    /* =======================
-        HAPUS DATA
-    ======================== */
-    public function destroy($id_paket)
+    public function destroy(PaketLayanan $paketLayanan)
     {
-        $paket = PaketLayanan::findOrFail($id_paket);
-
-        if ($paket->gambar_venue) {
-            Storage::disk('public')->delete($paket->gambar_venue);
+        if (!empty($paketLayanan->gambar_venue)) {
+            $oldPath = public_path($paketLayanan->gambar_venue);
+            if (file_exists($oldPath)) {
+                unlink($oldPath);
+            }
         }
 
-        $paket->delete();
+        $paketLayanan->delete();
 
-        return redirect()
-            ->route('paket-layanan.index')
-            ->with('success', 'Paket layanan berhasil dihapus');
+        return redirect()->route('paket-layanan.index')->with('success', 'Data berhasil dihapus.');
     }
 }

@@ -3,56 +3,60 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\Acara;
 use App\Models\Pemesanan;
+use App\Models\Venue;
 
 class DashboardController extends Controller
 {
-    public function index()
+    /**
+     * Menampilkan dashboard admin
+     */
+    public function index(Request $request)
     {
-        // Bisa kirim data dummy kalau mau
-        $data = [
-            'welcome' => 'Selamat datang di dashboard admin!'
-        ];
-
-        return view('dashboard', $data);
-    }
-}
-        // Tanggal dari query string, default hari ini
-        $tanggal = request()->get('tanggal', date('Y-m-d'));
+        // Ambil tanggal dari query string, default hari ini
+        $tanggal = $request->get('tanggal', date('Y-m-d'));
 
         // Statistik kartu
-        $acaraBerlangsung = Acara::where('status', 'berlangsung')->count();
-        $acaraSelesai = Acara::where('status', 'selesai')->count();
-        $menungguKonfirmasi = Pemesanan::where('status_pemesanan', 'menunggu')->count();
+        $acaraBerlangsung = Acara::where('status', 'berlangsung')
+            ->whereDate('tanggal', $tanggal)
+            ->count();
 
-        // Venue terpakai default 0
-        $venueTerpakai = 0;
+        $menungguKonfirmasi = Pemesanan::where('status_pemesanan', 'menunggu')
+            ->whereDate('tanggal_pemesanan', $tanggal)
+            ->count();
+
+        $acaraSelesai = Acara::where('status', 'selesai')
+            ->whereDate('tanggal', $tanggal)
+            ->count();
+
+        $venueTerpakai = 0; // default
 
         // Detail pelanggan
-        $detailPelanggan = Pemesanan::with(['paket', 'pelanggan'])
+        $detailPelanggan = Pemesanan::with(['acara', 'pelanggan', 'venue'])
             ->whereDate('tanggal_pemesanan', $tanggal)
             ->get()
-            ->map(function ($item) {
+            ->map(function($item) {
                 return [
-                    'nama_paket' => $item->paket->nama ?? '-',
-                    'nama_pelanggan' => $item->pelanggan->nama_pelanggan ?? '-',
+                    'nama_paket' => $item->acara->nama_paket ?? '-',
+                    'nama_pelanggan' => $item->pelanggan->nama ?? '-',
                     'tanggal_acara' => $item->tanggal_acara,
-                    'waktu_mulai' => $item->waktu_mulai ?? '-',
-                    'total_harga' => $item->total_harga ?? '-',
-                    'venue' => $item->venue ?? '-',
+                    'waktu_mulai' => $item->waktu_mulai,
+                    'total_harga' => $item->total_harga,
+                    'venue' => $item->venue->nama ?? '-',
                     'status' => $item->status,
                     'status_label' => ucfirst($item->status),
                 ];
             });
 
+        // Kirim data ke view
         return view('dashboard', compact(
             'acaraBerlangsung',
-            'acaraSelesai',
             'menungguKonfirmasi',
+            'acaraSelesai',
             'venueTerpakai',
             'detailPelanggan',
             'tanggal'
         ));
-
+    }
+}

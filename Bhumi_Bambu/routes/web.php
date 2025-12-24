@@ -7,8 +7,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PembayaranController;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 use App\Http\Controllers\PromoController;
-// use App\Http\Controllers\DashboardController;
-// use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaketLayananController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web'])->group(function () {
@@ -49,6 +48,9 @@ Route::get('/login', function () {
 
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 
+//paket layanan//
+// Route::middleware(['auth'])->group(function () {
+Route::resource('paket-layanan', PaketLayananController::class);
 
 
 
@@ -91,14 +93,6 @@ Route::post('/pembayaran/{id}/verify', [PembayaranController::class, 'verify']);
 Route::get('/', function () {
     return view('landingpage.index');
 });
-// Route::get('', function () {
-//     return view('welcome');
-// });
-
-/*
-/ Admin Promo CRUD
-/
-*/
 
 Route::middleware(['auth'])->group(function () {
 
@@ -127,13 +121,4 @@ Route::middleware(['auth'])->group(function () {
 
 Route::post('/apply-promo', [PemesananController::class, 'applyPromo'])->name('apply.promo');
 
-// Route::get('/login', function () {
-//     return view('login');   
-// })->name('login');
-// Route::post('/login', [LoginController::class, 'authenticate'])->name('login.authenticate');
-// Route::get('/login', [LoginController::class, 'index'])->name('login');
 
-use App\Http\Controllers\PaketLayananController;
-
-// Route::middleware(['auth'])->group(function () {
-Route::resource('paket-layanan', PaketLayananController::class);
