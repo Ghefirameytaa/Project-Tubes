@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 
 class LoginController extends Controller
@@ -13,7 +14,7 @@ class LoginController extends Controller
         return view('login');
     }
 
-    public function authenticate(Request $request)
+    public function login(Request $request)
     {
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -26,7 +27,7 @@ class LoginController extends Controller
                 return redirect()->route('admin.dashboard');
             }
 
-            return redirect()->route('pelanggan.home');
+            return redirect()->intended(('beranda'));
         }
 
         return back()->withErrors([
@@ -86,5 +87,5 @@ class LoginController extends Controller
 //         $request->session()->regenerateToken();
 //         return redirect('/');
 //     }
-// } -->
+// } 
 

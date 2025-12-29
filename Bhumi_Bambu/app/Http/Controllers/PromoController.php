@@ -8,32 +8,36 @@ use Illuminate\Support\Facades\Auth;
 
 class PromoController extends Controller
 {
-    // READ
     public function index()
     {
-        $promos = Promo::all();
-        return view('admin.promo.index', compact('promos'));
+        $promos = Promo::with('admin')->latest()->get();
+        
+        $stats = [
+            'total' => Promo::count(),
+            'aktif' => Promo::where('tanggal_selesai', '>=', now())->count(),
+            'kadaluarsa' => Promo::where('tanggal_selesai', '<', now())->count(),
+        ];
+        
+        return view('admin.promo.index', compact('promos', 'stats'));
     }
 
-    // CREATE (form)
     public function create()
     {
         return view('admin.promo.create');
     }
 
-    // STORE
     public function store(Request $request)
     {
         $request->validate([
-            'nama_promo' => 'required',
-            'deskripsi' => 'required',
+            'nama_promo' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'diskon' => 'required|numeric|min:1|max:100',
         ]);
 
         Promo::create([
-            'id_admin' => Auth::id(), // admin login
+            'id_admin' => Auth::id(),
             'nama_promo' => $request->nama_promo,
             'deskripsi' => $request->deskripsi,
             'tanggal_mulai' => $request->tanggal_mulai,
@@ -41,22 +45,21 @@ class PromoController extends Controller
             'diskon' => $request->diskon,
         ]);
 
-        return redirect()->route('promo.index')->with('success', 'Promo berhasil ditambahkan.');
+        return redirect()->route('admin.promo.index')
+            ->with('success', 'Promo berhasil ditambahkan!');
     }
 
-    // EDIT (form)
     public function edit($id)
     {
         $promo = Promo::findOrFail($id);
         return view('admin.promo.edit', compact('promo'));
     }
 
-    // UPDATE
     public function update(Request $request, $id)
     {
         $request->validate([
-            'nama_promo' => 'required',
-            'deskripsi' => 'required',
+            'nama_promo' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'diskon' => 'required|numeric|min:1|max:100',
@@ -65,13 +68,16 @@ class PromoController extends Controller
         $promo = Promo::findOrFail($id);
         $promo->update($request->all());
 
-        return redirect()->route('promo.index')->with('success', 'Promo berhasil diperbarui.');
+        return redirect()->route('admin.promo.index')
+            ->with('success', 'Promo berhasil diperbarui!');
     }
 
-    // DELETE
     public function destroy($id)
     {
-        Promo::destroy($id);
-        return redirect()->route('promo.index')->with('success', 'Promo berhasil dihapus.');
+        $promo = Promo::findOrFail($id);
+        $promo->delete();
+        
+        return redirect()->route('admin.promo.index')
+            ->with('success', 'Promo berhasil dihapus!');
     }
 }

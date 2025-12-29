@@ -2,192 +2,116 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pembayaran;
-use App\Models\Pemesanan;
+use App\Models\Reservasi;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class PembayaranController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pembayaran::query();
+        $status = $request->get('status', 'all');
+        $search = $request->get('search', '');
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status_pembayaran', $request->status);
+        // PERBAIKAN: Ambil yang SUDAH UPLOAD bukti transfer
+        $query = Reservasi::with(['paket', 'user'])
+            ->whereNotNull('bukti_transfer')  // ← Harus ada bukti
+            ->latest('updated_at');
+
+        // Filter by status_pembayaran (bukan status!)
+        if ($status != 'all') {
+            $query->where('status_pembayaran', $status);
         }
 
         // Search
-        if ($request->filled('search')) {
-            $query->where('nama_pengirim', 'like', '%' . $request->search . '%');
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('kode_booking', 'like', "%{$search}%");
+            });
         }
 
-        $pembayaran = $query->latest()->get();
+        $pembayaran = $query->get();
 
-        return view('Pembayaran.index', compact('pembayaran'));
-    }
+        // Stats - PERBAIKAN: Hitung dari yang ada bukti transfer
+        $stats = [
+            'total' => Reservasi::whereNotNull('bukti_transfer')->count(),
+            'menunggu_verifikasi' => Reservasi::whereNotNull('bukti_transfer')
+                ->where('status_pembayaran', 'menunggu_verifikasi')->count(),
+            'lunas' => Reservasi::where('status_pembayaran', 'lunas')->count(),
+            'ditolak' => Reservasi::where('status_pembayaran', 'ditolak')->count(),
+        ];
 
-    public function create()
-    {
-        $pemesanan = Pemesanan::all();
-        return view('Pembayaran.create', compact('pemesanan'));
-    }
-
-    public function store(Request $request)
-    {
-        Log::info('=== STORE PEMBAYARAN ===');
-        Log::info('Request data:', $request->all());
-
-        try {
-            // ✅ Validasi: terima id_pemesanan dari FORM
-            $validated = $request->validate([
-                'id_pemesanan' => 'required|integer|min:1',
-                'tanggal_pembayaran' => 'required|date',
-                'metode_pembayaran' => 'required|string',
-                'nama_bank' => 'nullable|string|max:255',
-                'nama_pengirim' => 'nullable|string|max:255',
-                'jumlah_bayar' => 'required|integer|min:0',
-                'status_pembayaran' => 'required|string',
-                'bukti_pembayaran' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            ]);
-
-            // ✅ MAPPING: form (id_pemesanan) → database (pemesanan_id)
-            $data = [
-                'pemesanan_id' => $request->id_pemesanan,
-                'tanggal_pembayaran' => $request->tanggal_pembayaran,
-                'metode_pembayaran' => $request->metode_pembayaran,
-                'nama_bank' => $request->nama_bank,
-                'nama_pengirim' => $request->nama_pengirim,
-                'jumlah_bayar' => $request->jumlah_bayar,
-                'status_pembayaran' => $request->status_pembayaran,
-            ];
-
-            Log::info('Data untuk database:', $data);
-
-            // Upload file
-            if ($request->hasFile('bukti_pembayaran')) {
-                $data['bukti_pembayaran'] = 
-                    $request->file('bukti_pembayaran')
-                            ->store('bukti-pembayaran', 'public');
-                Log::info('File uploaded:', ['path' => $data['bukti_pembayaran']]);
-            }
-
-            $pembayaran = Pembayaran::create($data);
-            
-            Log::info('✅ BERHASIL DISIMPAN! ID:', ['id' => $pembayaran->id]);
-
-            return redirect('/pembayaran')
-                ->with('success', 'Pembayaran berhasil ditambahkan! ID: ' . $pembayaran->id);
-
-        } catch (\Exception $e) {
-            Log::error('❌ ERROR STORE:', [
-                'message' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile()
-            ]);
-            
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
+        return view('pembayaran.index', compact('pembayaran', 'stats', 'status', 'search'));
     }
 
     public function show($id)
     {
-        $pembayaran = Pembayaran::findOrFail($id);
-        return view('Pembayaran.show', compact('pembayaran'));
-    }
-
-    public function edit($id)
-    {
-        $pembayaran = Pembayaran::findOrFail($id);
-        $pemesanan = Pemesanan::all();
-
-        return view('Pembayaran.edit', compact('pembayaran', 'pemesanan'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        try {
-            $validated = $request->validate([
-                'id_pemesanan' => 'required|integer|min:1',
-                'tanggal_pembayaran' => 'required|date',
-                'metode_pembayaran' => 'required|string',
-                'nama_bank' => 'nullable|string|max:255',
-                'nama_pengirim' => 'nullable|string|max:255',
-                'jumlah_bayar' => 'required|integer|min:0',
-                'status_pembayaran' => 'required|string',
-                'bukti_pembayaran' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            ]);
-
-            $pembayaran = Pembayaran::findOrFail($id);
-
-            $data = [
-                'pemesanan_id' => $request->id_pemesanan,
-                'tanggal_pembayaran' => $request->tanggal_pembayaran,
-                'metode_pembayaran' => $request->metode_pembayaran,
-                'nama_bank' => $request->nama_bank,
-                'nama_pengirim' => $request->nama_pengirim,
-                'jumlah_bayar' => $request->jumlah_bayar,
-                'status_pembayaran' => $request->status_pembayaran,
-            ];
-
-            if ($request->hasFile('bukti_pembayaran')) {
-                if ($pembayaran->bukti_pembayaran) {
-                    Storage::disk('public')->delete($pembayaran->bukti_pembayaran);
-                }
-
-                $data['bukti_pembayaran'] = 
-                    $request->file('bukti_pembayaran')
-                            ->store('bukti-pembayaran', 'public');
-            }
-
-            $pembayaran->update($data);
-
-            return redirect('/pembayaran')
-                ->with('success', 'Pembayaran berhasil diperbarui');
-
-        } catch (\Exception $e) {
-            Log::error('Update error: ' . $e->getMessage());
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Error: ' . $e->getMessage());
-        }
-    }
-
-    public function destroy($id)
-    {
-        $pembayaran = Pembayaran::findOrFail($id);
-
-        if ($pembayaran->bukti_pembayaran) {
-            Storage::disk('public')->delete($pembayaran->bukti_pembayaran);
+        $reservasi = Reservasi::with(['paket', 'user'])->findOrFail($id);
+        
+        if (!$reservasi->bukti_transfer) {
+            return redirect()->route('admin.pembayaran.index')
+                ->with('error', 'Reservasi ini belum upload bukti transfer.');
         }
 
-        $pembayaran->delete();
-
-        return redirect('/pembayaran')
-            ->with('success', 'Pembayaran berhasil dihapus');
+        return view('pembayaran.show', compact('reservasi'));
     }
 
     public function verify(Request $request, $id)
     {
         $request->validate([
-            'status_pembayaran' => 'required|in:Berhasil,Dibatalkan',
-            'catatan_admin' => 'nullable|string',
+            'action' => 'required|in:approve,reject',
+            'catatan_pembayaran' => 'nullable|string',
         ]);
 
-        $pembayaran = Pembayaran::findOrFail($id);
+        $reservasi = Reservasi::findOrFail($id);
+        $action = $request->input('action');
+        $catatan = $request->input('catatan_pembayaran');
 
-        $pembayaran->update([
-            'status_pembayaran' => $request->status_pembayaran,
-            'catatan_admin' => $request->catatan_admin,
-            'waktu_verifikasi' => now(),
-            'verifikasi_oleh' => auth()->id(),
+        if ($action === 'approve') {
+            // PERBAIKAN: Update KEDUA status
+            $reservasi->update([
+                'status' => 'lunas',
+                'status_pembayaran' => 'lunas',
+                'catatan_pembayaran' => $catatan ?? 'Pembayaran terverifikasi',
+            ]);
+            
+            return redirect()->back()->with('success', 'Pembayaran terverifikasi! Reservasi lunas.');
+            
+        } elseif ($action === 'reject') {
+            // PERBAIKAN: Update KEDUA status
+            $reservasi->update([
+                'status' => 'pending',
+                'status_pembayaran' => 'ditolak',
+                'catatan_pembayaran' => $catatan ?? 'Bukti pembayaran tidak valid',
+            ]);
+            
+            return redirect()->back()->with('success', 'Pembayaran ditolak. Customer diminta upload ulang.');
+        }
+
+        return redirect()->back()->with('error', 'Action tidak valid.');
+    }
+
+    public function destroy($id)
+    {
+        $reservasi = Reservasi::findOrFail($id);
+
+        // Hapus file bukti transfer
+        if ($reservasi->bukti_transfer) {
+            $path = str_replace('storage/', '', $reservasi->bukti_transfer);
+            Storage::disk('public')->delete($path);
+        }
+
+        // RESET status pembayaran, tapi reservasi TETAP ADA
+        $reservasi->update([
+            'bukti_transfer' => null,
+            'status' => 'pending',
+            'status_pembayaran' => 'belum_bayar',
+            'catatan_pembayaran' => null,
         ]);
 
-        return redirect()->back()
-            ->with('success', 'Status pembayaran diperbarui');
+        return redirect()->route('admin.pembayaran.index')
+            ->with('success', 'Bukti pembayaran berhasil dihapus. Reservasi dikembalikan ke status pending.');
     }
 }

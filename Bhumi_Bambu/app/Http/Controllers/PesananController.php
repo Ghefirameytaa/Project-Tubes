@@ -2,63 +2,93 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Reservasi;
 use Illuminate\Http\Request;
-use App\Models\Pesanan;
-use App\Models\Pelanggan;
-use App\Models\PaketLayanan;
 
 class PesananController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pesanan = Pesanan::with(['paket','pelanggan'])
-            ->orderByDesc('id')
-            ->get();
+        $status = $request->get('status', 'all');
+        $search = $request->get('search', '');
 
-        $paket = PaketLayanan::orderBy('nama_paket')->get();
-        $pelanggan = Pelanggan::orderBy('nama_pelanggan')->get();
+        $query = Reservasi::with(['paket', 'user']);
+        
+        if ($status != 'all') {
+            $query->where('status', $status);
+        }
+        
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('kode_booking', 'like', "%{$search}%")
+                  ->orWhereHas('paket', function($query) use ($search) {
+                      $query->where('nama_paket', 'like', "%{$search}%");
+                  });
+            });
+        }
 
-        return view('pesanan.index', compact('pesanan','paket','pelanggan'));
+        $allPesanan = $query->latest('created_at')->get();
+
+        $stats = [
+            'total' => Reservasi::count(),
+            'pending' => Reservasi::where('status', 'pending')->count(),
+            'menunggu_pembayaran' => Reservasi::where('status', 'menunggu_pembayaran')->count(),
+            'lunas' => Reservasi::where('status', 'lunas')->count(),
+            'ditolak' => Reservasi::where('status', 'ditolak')->count(),
+        ];
+
+        return view('pesanan.index', compact('allPesanan', 'stats', 'status', 'search'));
     }
 
-    public function store(Request $request)
+    public function approve($id)
     {
-        $data = $request->validate([
-            'id_paket' => 'required|exists:paket_layanan,id',
-            'id_pelanggan' => 'required|exists:pelanggan,id',
-            'tanggal_pesanan' => 'required|date',
-            'total_harga' => 'required|numeric|min:0',
-            'status_pesanan' => 'required|in:Berhasil,Menunggu,Dibatalkan',
+        $item = Reservasi::findOrFail($id);
+        
+        if (!$item->bukti_transfer) {
+            return redirect()->back()->with('error', 'Reservasi belum upload bukti transfer!');
+        }
+        
+        $item->update([
+            'status' => 'menunggu_pembayaran',
+            'status_pembayaran' => 'menunggu_verifikasi'
         ]);
-
-        $data['nama_pemesan'] = Pelanggan::where('id', $data['id_pelanggan'])->value('nama_pelanggan') ?? '-';
-
-        Pesanan::create($data);
-
-        return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil ditambahkan');
+        
+        return redirect()->back()->with('success', 'Reservasi disetujui! Menunggu verifikasi pembayaran.');
     }
 
-    public function update(Request $request, Pesanan $pesanan)
+    public function reject($id)
     {
-        $data = $request->validate([
-            'id_paket' => 'required|exists:paket_layanan,id',
-            'id_pelanggan' => 'required|exists:pelanggan,id',
-            'tanggal_pesanan' => 'required|date',
-            'total_harga' => 'required|numeric|min:0',
-            'status_pesanan' => 'required|in:Berhasil,Menunggu,Dibatalkan',
+        $item = Reservasi::findOrFail($id);
+        
+        $item->update([
+            'status' => 'ditolak',
+            'status_pembayaran' => 'ditolak'
         ]);
-
-        $data['nama_pemesan'] = Pelanggan::where('id', $data['id_pelanggan'])->value('nama_pelanggan') ?? '-';
-
-        $pesanan->update($data);
-
-        return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil diubah');
+        
+        return redirect()->back()->with('success', 'Reservasi ditolak.');
     }
 
-    public function destroy(Pesanan $pesanan)
+    public function destroy($id)
     {
-        $pesanan->delete();
+        $item = Reservasi::findOrFail($id);
+        
+        if ($item->bukti_transfer) {
+            $filePath = public_path($item->bukti_transfer);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+        
+        $item->delete();
+        
+        return redirect()->back()->with('success', 'Reservasi berhasil dihapus.');
+    }
 
-        return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil dihapus');
+    public function show($id)
+    {
+        $item = Reservasi::with(['paket', 'user'])->findOrFail($id);
+        return view('pesanan.show', compact('item'));
     }
 }

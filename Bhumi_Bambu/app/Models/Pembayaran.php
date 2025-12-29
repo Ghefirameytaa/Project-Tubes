@@ -3,8 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Pemesanan;
+use App\Models\Pesanan;
 use App\Models\User;
+
 
 class Pembayaran extends Model
 {
@@ -32,9 +33,9 @@ class Pembayaran extends Model
 
     /* ================= RELATION ================= */
 
-    public function pemesanan()
+    public function pesanan()
     {
-        return $this->belongsTo(Pemesanan::class, 'pemesanan_id');
+        return $this->belongsTo(Pesanan::class, 'pemesanan_id');
     }
 
     public function verifikator()

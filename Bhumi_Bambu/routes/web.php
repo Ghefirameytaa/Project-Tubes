@@ -1,151 +1,84 @@
 <?php
 
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PembayaranController;
-use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
+use App\Http\Controllers\PesananController;
 use App\Http\Controllers\PromoController;
+use App\Http\Controllers\ReservasiController;
 use App\Http\Controllers\PaketLayananController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| CONTROLLERS
+| PUBLIC ROUTES
 |--------------------------------------------------------------------------
 */
-// use App\Http\Controllers\LandingPageController;
-// use App\Http\Controllers\LoginController;
-// use App\Http\Controllers\DashboardController;
-// use App\Http\Controllers\PesananController;
-// use App\Http\Controllers\PembayaranController;
-// use App\Http\Controllers\PromoController;
-// use App\Http\Controllers\PaketLayananController;
+Route::get('/', [HomeController::class, 'landing'])->name('landing');
 
 /*
 |--------------------------------------------------------------------------
-| LANDING PAGE
-|--------------------------------------------------------------------------
-*/
-Route::get('/', [LandingPageController::class, 'index'])->name('landing');
-
-/*
-|--------------------------------------------------------------------------
-| LOGIN & LOGOUT (TIDAK MAKSA AUTH KE PEMESANAN)
+| AUTH ROUTES
 |--------------------------------------------------------------------------
 */
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'authenticate'])->name('login.submit');
+Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
-| DASHBOARD (AUTH)
+| USER ROUTES (Pelanggan)
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->group(function () {
-    Route::get('/admin/dashboard', [DashboardController::class, 'index'])
-        ->name('admin.dashboard');
-});
-
-// Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'admin'])->name('admin.dashboard');
-
-Route::get('/login', [LoginController::class, 'login'])->name('login.submit');
-Route::get('/login', function () {
-    return view('login');   
-})->name('login');
-
-Route::post('/login', [LoginController::class, 'login'])->name('login');
-
-//paket layanan//
-// Route::middleware(['auth'])->group(function () {
-Route::resource('paket-layanan', PaketLayananController::class);
-
-
-
-// READ - List semua pembayaran (dengan filter & search)
-Route::get('/pembayaran', [PembayaranController::class, 'index']);
-
-// CREATE - Form tambah pembayaran baru
-Route::get('/pembayaran/create', [PembayaranController::class, 'create']);
-
-// CREATE - Simpan data pembayaran baru
-Route::post('/pembayaran', [PembayaranController::class, 'store']);
-return redirect('/pembayaran')->with('success', 'Pembayaran berhasil ditambahkan');
-
-// READ - Detail pembayaran tertentu
-Route::get('/pembayaran/{id}', [PembayaranController::class, 'show']);
-
-// UPDATE - Form edit pembayaran
-Route::get('/pembayaran/{id}/edit', [PembayaranController::class, 'edit']);
-
-// UPDATE - Simpan perubahan pembayaran
-Route::put('/pembayaran/{id}', [PembayaranController::class, 'update']);
-
-// DELETE - Hapus pembayaran
-Route::delete('/pembayaran/{id}', [PembayaranController::class, 'destroy']);
-
-// BONUS - Verifikasi pembayaran (Approve/Reject)
-Route::post('/pembayaran/{id}/verify', [PembayaranController::class, 'verify']);
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-/*
-| Public
-*/
-
-/*
-|--------------------------------------------------------------------------
-| PEMESANAN (INI YANG KAMU PAKAI)
-| URL: /pemesanan
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/', function () {
-    return redirect()->route('pesanan.index');
-});
-
-Route::resource('pesanan', PesananController::class)->only([
-    'index','store','update','destroy'
-]);
-
-
-/*
-|--------------------------------------------------------------------------
-| PEMBAYARAN (TETAP, TIDAK DIUBAH)
-|--------------------------------------------------------------------------
-*/
-Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran.index');
-Route::get('/pembayaran/create', [PembayaranController::class, 'create'])->name('pembayaran.create');
-Route::post('/pembayaran', [PembayaranController::class, 'store'])->name('pembayaran.store');
-Route::get('/pembayaran/{id}', [PembayaranController::class, 'show'])->name('pembayaran.show');
-Route::get('/pembayaran/{id}/edit', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
-Route::put('/pembayaran/{id}', [PembayaranController::class, 'update'])->name('pembayaran.update');
-Route::delete('/pembayaran/{id}', [PembayaranController::class, 'destroy'])->name('pembayaran.destroy');
-
-/*
-|--------------------------------------------------------------------------
-| PROMO (AUTH)
-|--------------------------------------------------------------------------
-*/
-Route::middleware('auth')->group(function () {
-    Route::get('/admin/promo', [PromoController::class, 'index'])->name('promo.index');
-    Route::get('/admin/promo/create', [PromoController::class, 'create'])->name('promo.create');
-    Route::post('/admin/promo', [PromoController::class, 'store'])->name('promo.store');
-    Route::get('/admin/promo/{id}/edit', [PromoController::class, 'edit'])->name('promo.edit');
-    Route::put('/admin/promo/{id}', [PromoController::class, 'update'])->name('promo.update');
-    Route::delete('/admin/promo/{id}', [PromoController::class, 'destroy'])->name('promo.destroy');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/beranda', [HomeController::class, 'beranda'])->name('beranda');
+    
+    // Reservasi
+    Route::get('/reservasi/buat', [ReservasiController::class, 'create'])->name('reservasi.create');
+    Route::post('/reservasi/store', [ReservasiController::class, 'store'])->name('reservasi.store');
+    Route::get('/reservasi/review', [ReservasiController::class, 'review'])->name('reservasi.review');
+    Route::post('/reservasi/confirm', [ReservasiController::class, 'confirm'])->name('reservasi.confirm');
+    Route::get('/reservasi/payment/{id}', [ReservasiController::class, 'payment'])->name('reservasi.payment');
+    Route::post('/reservasi/upload-payment', [ReservasiController::class, 'uploadPayment'])->name('reservasi.upload-payment');
+    Route::get('/reservasi/ticket/{id}', [ReservasiController::class, 'ticket'])->name('reservasi.ticket');
+    Route::get('/reservasi/saya', [ReservasiController::class, 'my'])->name('reservasi.saya');
 });
 
 /*
 |--------------------------------------------------------------------------
-| PAKET LAYANAN
+| ADMIN ROUTES
 |--------------------------------------------------------------------------
 */
-
-Route::post('/apply-promo', [PemesananController::class, 'applyPromo'])->name('apply.promo');
-
-Route::resource('paket-layanan', PaketLayananController::class);
-
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // List Pesanan (Verifikasi Reservasi)
+    Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan.index');
+    Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
+    Route::patch('/pesanan/{id}/approve', [PesananController::class, 'approve'])->name('pesanan.approve');
+    Route::patch('/pesanan/{id}/reject', [PesananController::class, 'reject'])->name('pesanan.reject');
+    Route::delete('/pesanan/{id}', [PesananController::class, 'destroy'])->name('pesanan.destroy');
+    
+    // Pembayaran (Verifikasi Pembayaran)
+    Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran.index');
+    Route::get('/pembayaran/{id}', [PembayaranController::class, 'show'])->name('pembayaran.show');
+    Route::post('/pembayaran/{id}/verify', [PembayaranController::class, 'verify'])->name('pembayaran.verify');
+    Route::delete('/pembayaran/{id}', [PembayaranController::class, 'destroy'])->name('pembayaran.destroy');
+    
+    // Paket Layanan
+    Route::get('/paket-layanan', [PaketLayananController::class, 'index'])->name('paket-layanan.index');
+    Route::get('/paket-layanan/create', [PaketLayananController::class, 'create'])->name('paket-layanan.create');
+    Route::post('/paket-layanan', [PaketLayananController::class, 'store'])->name('paket-layanan.store');
+    Route::get('/paket-layanan/{id}/edit', [PaketLayananController::class, 'edit'])->name('paket-layanan.edit');
+    Route::put('/paket-layanan/{id}', [PaketLayananController::class, 'update'])->name('paket-layanan.update');
+    Route::delete('/paket-layanan/{id}', [PaketLayananController::class, 'destroy'])->name('paket-layanan.destroy');
+    // Promo
+    Route::get('/promo', [PromoController::class, 'index'])->name('promo.index');
+    Route::get('/promo/create', [PromoController::class, 'create'])->name('promo.create');
+    Route::post('/promo', [PromoController::class, 'store'])->name('promo.store');
+    Route::get('/promo/{id}/edit', [PromoController::class, 'edit'])->name('promo.edit');
+    Route::put('/promo/{id}', [PromoController::class, 'update'])->name('promo.update');
+    Route::delete('/promo/{id}', [PromoController::class, 'destroy'])->name('promo.destroy');
+});
